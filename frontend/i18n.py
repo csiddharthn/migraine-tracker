@@ -106,7 +106,7 @@ def localize_items(cfg, items: list[dict[str, Any]], *, lang: str | None = None)
 
 
 def yes_no(cfg, value: bool, *, lang: str | None = None) -> str:
-    return tr("Ja", "Yes", lang=lang) if value else tr("Nein", "No", lang=lang)
+    return tr(cfg, "Ja", "Yes", lang=lang) if value else tr(cfg, "Nein", "No", lang=lang)
 
 
 def aura_label(cfg, code: str, *, lang: str | None = None) -> str:

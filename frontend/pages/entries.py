@@ -59,7 +59,7 @@ with database_session() as session:
             entry_service=service,
             trigger_definitions=active_triggers,
             medication_options=medication_options,
-            user_id=str(cfg, user.id),
+            user_id=str(user.id),
             session=session,
         )
 
