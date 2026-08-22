@@ -3,7 +3,8 @@
   "model": "groq/openai/gpt-oss-120b",
   "small_model": "groq/openai/gpt-oss-20b",
   "enabled_providers": [
-    "groq"
+    "groq",
+    "openrouter"
   ],
   "default_agent": "groq-lite",
   "agent": {
@@ -43,6 +44,31 @@
     }
   },
   "provider": {
+    "openrouter": {
+      "options": {
+        "apiKey": "{env:OPENROUTER_API_KEY}"
+      },
+      "whitelist": [
+        "openrouter/anthropic/claude-3.5-sonnet",
+        "openrouter/openai/gpt-4o",
+        "openrouter/openai/gpt-oss-120b",
+        "openrouter/openai/gpt-oss-20b"
+      ],
+      "models": {
+        "openrouter/anthropic/claude-3.5-sonnet": {
+          "limit": {
+            "context": 131072,
+            "output": 1024
+          }
+        },
+        "openrouter/openai/gpt-4o": {
+          "limit": {
+            "context": 131072,
+            "output": 1024
+          }
+        }
+      }
+    },
     "groq": {
       "options": {
         "apiKey": "{env:GROQ_API_KEY}"

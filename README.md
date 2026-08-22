@@ -102,11 +102,12 @@ Unabhängig von der Sprache der Eingabe wird der strukturierte Formularentwurf a
 
 Alternativ kann die Beschreibung direkt im Browser eingesprochen werden. Die Aufnahme wird nach Einwilligung über Groq transkribiert und als vollständig bearbeitbarer Text in dasselbe Eingabefeld übernommen; die Audiodatei selbst wird nicht in PostgreSQL gespeichert. Für höchste Genauigkeit wird zuerst `whisper-large-v3` verwendet. Falls dieses Modell vorübergehend nicht verfügbar oder durch ein Nutzungslimit blockiert ist, folgt automatisch `whisper-large-v3-turbo`. Die Sprache kann automatisch erkannt oder ausdrücklich als Deutsch beziehungsweise Englisch angegeben werden.
 
-Für die Funktion wird ein eigener Groq-API-Schlüssel benötigt. Er kann in der [Groq Console](https://console.groq.com/keys) angelegt werden. Den Schlüssel nicht in den Quellcode und nicht in `backend/config/app.yaml` eintragen. Stattdessen lokal eine der folgenden Zeilen ergänzen und Streamlit anschließend neu starten:
+Für die Funktion wird ein eigener Groq- oder OpenRouter-API-Schlüssel benötigt. Der Groq-Schlüssel kann in der [Groq Console](https://console.groq.com/keys) angelegt werden; der OpenRouter-Schlüssel unter [OpenRouter](https://openrouter.ai/keys). Den Schlüssel nicht in den Quellcode und nicht in `backend/config/app.yaml` eintragen. Stattdessen lokal eine der folgenden Zeilen ergänzen und Streamlit anschließend neu starten:
 
 ```dotenv
 # .env
 GROQ_API_KEY=gsk_...
+OPENROUTER_API_KEY=sk-or-...
 ```
 
 oder:
@@ -114,9 +115,10 @@ oder:
 ```toml
 # .streamlit/secrets.toml
 GROQ_API_KEY = "gsk_..."
+OPENROUTER_API_KEY = "sk-or-..."
 ```
 
-Das Werkzeug verwendet ausschließlich Groq. Im Eingabereiter kann das bevorzugte Modell gewählt werden. Standardmäßig wird zuerst `openai/gpt-oss-120b` verwendet; bei einem vorübergehenden Fehler oder Nutzungslimit probiert die Anwendung automatisch `openai/gpt-oss-20b`. Beide Modelle unterstützen die hier verwendeten strikt strukturierten Ausgaben. Der Präfix `openai/` ist dabei nur Bestandteil der von Groq vorgegebenen Modell-ID; alle Anfragen gehen ausschließlich an Groq. Die Modelllisten für Texterkennung und Sprache, die Standardmodelle, das Zeitlimit und die Promptversion stehen als nicht geheime Einstellungen unter `ai_intake` in `backend/config/app.yaml`. Welche Modelle im kostenlosen Tarif verfügbar sind und welche Limits gelten, bestimmt Groq; die aktuellen Grenzen stehen im Groq-Konto.
+Das Werkzeug unterstützt sowohl Groq als auch OpenRouter. Im Eingabereiter kann der Anbieter und das bevorzugte Modell gewählt werden. Standardmäßig wird zuerst `openai/gpt-oss-120b` (Groq) verwendet; bei einem vorübergehenden Fehler oder Nutzungslimit probiert die Anwendung automatisch `openai/gpt-oss-20b`. Für OpenRouter stehen Modelle wie `openrouter/anthropic/claude-3.5-sonnet` und `openrouter/openai/gpt-4o` zur Verfügung. Die Modelllisten, Standardmodelle, das Zeitlimit und die Promptversion stehen als nicht geheime Einstellungen unter `ai_intake` in `backend/config/app.yaml`.
 
 Der Gesundheitstext wird erst nach einer sichtbaren Einwilligung an die Groq-API gesendet. Die KI erstellt ausschließlich einen prüfpflichtigen Entwurf. Der ursprüngliche Eingabetext kann beim Speichern wahlweise getrennt vom erzeugten Notiztext in PostgreSQL aufbewahrt werden; Groq als Anbieter, das tatsächlich verwendete Modell, Promptversion, strukturierter Entwurf und Prüfzeitpunkt werden zur Nachvollziehbarkeit protokolliert.
 

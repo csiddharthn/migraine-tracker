@@ -1,11 +1,32 @@
 from __future__ import annotations
 
+"""Purpose: AI intake service for generating structured migraine intake drafts.
+
+Usage: Uses configured AI providers (Groq, OpenRouter) to process
+narrative descriptions and return structured AIIntakeDraft objects.
+
+Functions available:
+- None (service class)
+
+Classes available:
+- AIIntakeError
+- AIIntakeService
+
+Call hierarchy:
+- service.py -> backend.ai_intake.schemas
+- service.py -> backend.ai_intake.providers
+- service.py -> backend.models.TriggerDefinition
+"""
+
 import json
 from copy import deepcopy
 from collections.abc import Callable, Sequence
 from datetime import date
 from typing import Any
 
+from backend.ai_intake.providers import AIProvider
+from backend.ai_intake.providers.groq_provider import GroqProvider
+from backend.ai_intake.providers.openrouter_provider import OpenRouterProvider
 from backend.ai_intake.schemas import AIClarificationQuestion, AIIntakeDraft
 from backend.models import TriggerDefinition
 
@@ -18,6 +39,7 @@ class AIIntakeService:
     def __init__(
         self,
         *,
+        provider_name: str | None = None,
         api_key: str,
         models: Sequence[str] = (),
         model: str | None = None,
@@ -32,6 +54,8 @@ class AIIntakeService:
         self.models = tuple(dict.fromkeys(item.strip() for item in model_chain if item.strip()))
         if not self.models:
             raise AIIntakeError("Für die KI-Auswertung ist kein Groq-Modell konfiguriert.")
+        self.provider_name = provider_name or "groq"
+        self.provider: AIProvider = self._build_provider(provider_name, api_key, timeout_seconds)
         self.prompt_version = prompt_version
         self.timeout_seconds = timeout_seconds
         self.model_used: str | None = None
@@ -69,7 +93,7 @@ class AIIntakeService:
         for model_name in self.models:
             attempted.append(model_name)
             try:
-                response = client.chat.completions.create(
+                response = self.provider.chat_completion(
                     model=model_name,
                     messages=[
                         {"role": "system", "content": self._system_prompt()},
@@ -93,12 +117,13 @@ class AIIntakeService:
             "Prüfen Sie den API-Schlüssel, die Internetverbindung und die Groq-Nutzungslimits."
         ) from failures[-1]
 
-    def _client(self) -> Any:
-        if self._client_factory is not None:
-            return self._client_factory(api_key=self._api_key, timeout=self.timeout_seconds)
-        from groq import Groq
+    def _build_provider(self, provider_name: str, api_key: str, timeout_seconds: int) -> AIProvider:
+        if provider_name == "openrouter":
+            return OpenRouterProvider(api_key=api_key, timeout_seconds=timeout_seconds)
+        return GroqProvider(api_key=api_key, timeout_seconds=timeout_seconds)
 
-        return Groq(api_key=self._api_key, timeout=self.timeout_seconds)
+    def _client(self) -> AIProvider:
+        return self.provider
 
     @staticmethod
     def _response_format() -> dict[str, Any]:

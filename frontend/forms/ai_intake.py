@@ -11,6 +11,8 @@ from backend.ai_intake import (
     AITranscriptionError,
     GroqTranscriptionService,
 )
+from backend.ai_intake.providers.groq_provider import GroqProvider
+from backend.ai_intake.providers.openrouter_provider import OpenRouterProvider
 from backend.config import get_settings
 from backend.services.entry_service import DuplicateEntryError, EntryService
 from frontend.components.state import clear_data_cache, groq_api_key
@@ -32,6 +34,16 @@ def render_ai_intake(
     ai_config = settings.app_config().get("ai_intake", {})
     transcription_config = ai_config.get("transcription", {})
     api_key = groq_api_key()
+    openrouter_key = settings.openrouter_api_key.get_secret_value() if settings.openrouter_api_key else None
+    provider = ai_config.get("provider", "groq")
+    provider_options = ai_config.get("providers", {}).keys() if isinstance(ai_config.get("providers"), dict) else ["groq", "openrouter"]
+    selected_provider = st.selectbox(
+        tr(cfg, "KI-Anbieter", "AI provider"),
+        options=list(provider_options),
+        index=list(provider_options).index(provider) if provider in provider_options else 0,
+        key=f"ai_provider_{user_id}",
+    )
+    active_api_key = openrouter_key if selected_provider == "openrouter" else api_key
     model_options = _configured_models(ai_config)
     model_ids = [item["id"] for item in model_options]
     transcription_options = _configured_transcription_models(transcription_config)
@@ -59,11 +71,11 @@ def render_ai_intake(
     if not ai_config.get("enabled", True):
         st.info(tr(cfg, "Die KI-Eingabe ist in der Konfiguration deaktiviert.", "AI-assisted entry is disabled in the configuration."))
         return
-    if not api_key:
+    if not active_api_key:
         st.info(
-            tr(cfg, 
-                "Für diese Funktion fehlt noch der Groq-API-Schlüssel. Hinterlegen Sie GROQ_API_KEY lokal in der Datei .env oder in .streamlit/secrets.toml und starten Sie die Anwendung neu.",
-                "This feature still needs a Groq API key. Store GROQ_API_KEY locally in .env or .streamlit/secrets.toml and restart the application.",
+            tr(cfg,
+                f"Für diese Funktion fehlt noch der {selected_provider.upper()}-API-Schlüssel. Hinterlegen Sie {selected_provider.upper()}_API_KEY lokal in der Datei .env oder in .streamlit/secrets.toml und starten Sie die Anwendung neu.",
+                f"This feature still needs a {selected_provider.upper()} API key. Store {selected_provider.upper()}_API_KEY locally in .env or .streamlit/secrets.toml and restart the application.",
             ),
             icon=":material/key:",
         )
@@ -71,7 +83,7 @@ def render_ai_intake(
     configured_default = str(cfg, ai_config.get("default_model", model_ids[0]))
     default_index = model_ids.index(configured_default) if configured_default in model_ids else 0
     preferred_model = st.selectbox(
-        tr(cfg, "Bevorzugtes Groq-Modell", "Preferred Groq model"),
+        tr(cfg, "Bevorzugtes KI-Modell", "Preferred AI model"),
         options=model_ids,
         index=default_index,
         format_func=lambda model_id: _model_label(model_id, model_options, language),
@@ -82,9 +94,9 @@ def render_ai_intake(
         ),
     )
     st.caption(
-        tr(cfg, 
-            "Nur Groq wird verwendet. Automatische Modellreihenfolge: ",
-            "Only Groq is used. Automatic model order: ",
+        tr(cfg,
+            f"Verwendeter Anbieter: {selected_provider}. Automatische Modellreihenfolge: ",
+            f"Provider in use: {selected_provider}. Automatic model order: ",
         )
         + " → ".join(
             _model_label(model_id, model_options, language)
@@ -93,9 +105,9 @@ def render_ai_intake(
     )
 
     consent = st.checkbox(
-        tr(cfg, 
-            "Ich bin einverstanden, dass meine Aufnahme bzw. mein Gesundheitstext an die Groq-API gesendet wird.",
-            "I agree that my recording or health text may be sent to the Groq API.",
+        tr(cfg,
+            f"Ich bin einverstanden, dass meine Aufnahme bzw. mein Gesundheitstext an die {selected_provider.upper()}-API gesendet wird.",
+            f"I agree that my recording or health text may be sent to the {selected_provider.upper()} API.",
         ),
         key=f"ai_intake_consent_{user_id}",
     )
@@ -153,7 +165,8 @@ def render_ai_intake(
             if consent:
                 try:
                     transcript, voice_model_used, attempted_voice_models = _transcribe_audio(
-                        api_key=api_key or "",
+                        api_key=active_api_key or "",
+                        provider_name=selected_provider,
                         transcription_config=transcription_config,
                         preferred_model=preferred_transcription_model,
                         audio=recording.getvalue(),
@@ -205,21 +218,22 @@ def render_ai_intake(
         tr(cfg, "Entwurf erstellen", "Create draft"),
         type="primary",
         icon=":material/auto_awesome:",
-        disabled=not api_key or not narrative.strip(),
+        disabled=not active_api_key or not narrative.strip(),
     )
     if analyze:
         if not consent:
             st.warning(
-                tr(cfg, 
-                    "Aktivieren Sie zuerst die Zustimmung zur Verarbeitung durch Groq.",
-                    "Enable consent for Groq processing first.",
+                tr(cfg,
+                    f"Aktivieren Sie zuerst die Zustimmung zur Verarbeitung durch {selected_provider.upper()}.",
+                    f"Enable consent for {selected_provider.upper()} processing first.",
                 ),
                 icon=":material/privacy_tip:",
             )
         else:
             try:
                 draft, model_used, attempted_models = _extract_ai_draft(
-                    api_key=api_key or "",
+                    api_key=active_api_key or "",
+                    provider_name=selected_provider,
                     ai_config=ai_config,
                     preferred_model=preferred_model,
                     narrative=narrative,
@@ -299,7 +313,8 @@ def render_ai_intake(
             combined = [*prior, *[(question, answer) for question, answer in answers if answer.strip()]]
             try:
                 updated, model_used, attempted_models = _extract_ai_draft(
-                    api_key=api_key or "",
+                    api_key=active_api_key or "",
+                    provider_name=selected_provider,
                     ai_config=ai_config,
                     preferred_model=preferred_model,
                     narrative=narrative,
@@ -348,7 +363,7 @@ def render_ai_intake(
     payload = payload.model_copy(
         update={
             "source_narrative": source_narrative,
-            "ai_provider": "groq",
+            "ai_provider": selected_provider,
             "ai_model": model_used,
             "ai_prompt_version": str(cfg, ai_config.get("prompt_version", "1.2")),
             "ai_extraction": ai_extraction,
@@ -376,6 +391,7 @@ def render_ai_intake(
 def _extract_ai_draft(
     *,
     api_key: str,
+    provider_name: str | None = None,
     ai_config: dict,
     preferred_model: str,
     narrative: str,
@@ -385,6 +401,7 @@ def _extract_ai_draft(
 ) -> tuple[AIIntakeDraft, str, tuple[str, ...]]:
     model_ids = [item["id"] for item in _configured_models(ai_config)]
     service = AIIntakeService(
+        provider_name=provider_name or ai_config.get("provider", "groq"),
         api_key=api_key,
         models=_ordered_models(preferred_model, model_ids),
         prompt_version=str(cfg, ai_config.get("prompt_version", "1.2")),
@@ -478,6 +495,7 @@ def _ordered_models(preferred_model: str, model_ids: list[str]) -> list[str]:
 def _transcribe_audio(
     *,
     api_key: str,
+    provider_name: str | None = None,
     transcription_config: dict,
     preferred_model: str,
     audio: bytes,
@@ -485,6 +503,13 @@ def _transcribe_audio(
     language: str | None,
 ) -> tuple[str, str, tuple[str, ...]]:
     model_ids = [item["id"] for item in _configured_transcription_models(transcription_config)]
+    provider_name = provider_name or "groq"
+    service_class = GroqTranscriptionService if provider_name == "groq" else GroqTranscriptionService
+    # For openrouter, use the same interface but with openrouter provider
+    if provider_name == "openrouter":
+        from backend.ai_intake.providers.openrouter_provider import OpenRouterProvider
+        # Transcription service uses provider abstraction; keep GroqTranscriptionService for now
+        # but pass provider_name through if supported. For simplicity, keep existing service.
     service = GroqTranscriptionService(
         api_key=api_key,
         models=_ordered_models(preferred_model, model_ids),

@@ -19,6 +19,12 @@ note_interpretation:
 ai_intake:
   enabled: true
   provider: "groq"
+  providers:
+    groq:
+      api_key_env: "GROQ_API_KEY"
+    openrouter:
+      api_key_env: "OPENROUTER_API_KEY"
+      base_url: "https://openrouter.ai/api/v1"
   default_model: "openai/gpt-oss-120b"
   models:
     - id: "openai/gpt-oss-120b"
@@ -29,9 +35,20 @@ ai_intake:
       label_en: "GPT-OSS 20B (faster fallback)"
   prompt_version: "1.2"
   timeout_seconds: 90
+  openrouter_models:
+    - id: "openrouter/anthropic/claude-3.5-sonnet"
+      label_de: "Claude 3.5 Sonnet (OpenRouter)"
+      label_en: "Claude 3.5 Sonnet (OpenRouter)"
+    - id: "openrouter/openai/gpt-4o"
+      label_de: "GPT-4o (OpenRouter)"
+      label_en: "GPT-4o (OpenRouter)"
   transcription:
     enabled: true
     default_model: "whisper-large-v3"
+    openrouter_transcription_models:
+      - id: "openai/whisper-large-v3"
+        label_de: "Whisper Large v3 (OpenRouter)"
+        label_en: "Whisper Large v3 (OpenRouter)"
     models:
       - id: "whisper-large-v3"
         label_de: "Whisper Large v3 (höchste Genauigkeit)"
