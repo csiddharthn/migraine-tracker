@@ -19,11 +19,11 @@ def current_language(cfg) -> str:
 
 
 def tr(cfg, german: str, english: str, *, lang: str | None = None) -> str:
-    return english if (lang or current_language()) == "en" else german
+    return english if (lang or current_language(cfg)) == "en" else german
 
 
 def localize_value(cfg, value: Any, *, lang: str | None = None) -> Any:
-    resolved_language = lang or current_language()
+    resolved_language = lang or current_language(cfg)
     if not isinstance(value, str):
         return value
     if " · " in value:
@@ -61,7 +61,7 @@ def localize_value(cfg, value: Any, *, lang: str | None = None) -> Any:
 
 
 def canonical_value(cfg, value: str, *, lang: str | None = None) -> str:
-    if (lang or current_language()) != "en":
+    if (lang or current_language(cfg)) != "en":
         return value
     if value.startswith("Aura: "):
         label = value.removeprefix("Aura: ")
@@ -79,7 +79,7 @@ def canonical_value(cfg, value: str, *, lang: str | None = None) -> str:
 
 
 def column_label(cfg, value: str, *, lang: str | None = None) -> str:
-    if (lang or current_language()) == "en":
+    if (lang or current_language(cfg)) == "en":
         return cfg.COLUMN_TRANSLATIONS.get(value, value)
     return value
 
@@ -111,13 +111,13 @@ def derived_laterality_label(cfg, code: str, *, lang: str | None = None) -> str:
 
 
 def trigger_label(cfg, code: str, stored_label: str, *, lang: str | None = None) -> str:
-    if (lang or current_language()) == "en":
+    if (lang or current_language(cfg)) == "en":
         return cfg.TRIGGER_LABELS_EN.get(code, stored_label)
     return stored_label
 
 
 def trigger_description(cfg, code: str, stored_description: str, *, lang: str | None = None) -> str:
-    if (lang or current_language()) == "en":
+    if (lang or current_language(cfg)) == "en":
         return cfg.TRIGGER_DESCRIPTIONS_EN.get(code, stored_description)
     return stored_description
 
@@ -128,36 +128,36 @@ def trigger_text(cfg, code: str, stored_label: str, *, lang: str | None = None) 
 
 def month_label(cfg, month_key: str, *, lang: str | None = None) -> str:
     year, month = month_key.split("-", 1)
-    names = cfg.MONTHS_EN if (lang or current_language()) == "en" else cfg.MONTHS_DE
+    names = cfg.MONTHS_EN if (lang or current_language(cfg)) == "en" else cfg.MONTHS_DE
     return f"{names[int(month) - 1]} {year}"
 
 
 def format_date_value(cfg, value: date | None, *, lang: str | None = None) -> str:
     if value is None:
         return "–"
-    return value.strftime("%Y-%m-%d" if (lang or current_language()) == "en" else "%d.%m.%Y")
+    return value.strftime("%Y-%m-%d" if (lang or current_language(cfg)) == "en" else "%d.%m.%Y")
 
 
 def format_datetime_value(cfg, value: datetime | None, *, lang: str | None = None) -> str:
     if value is None:
         return "–"
-    return value.astimezone().strftime("%Y-%m-%d %H:%M" if (lang or current_language()) == "en" else "%d.%m.%Y %H:%M")
+    return value.astimezone().strftime("%Y-%m-%d %H:%M" if (lang or current_language(cfg)) == "en" else "%d.%m.%Y %H:%M")
 
 
 def date_input_format(cfg, *, lang: str | None = None) -> str:
-    return "YYYY-MM-DD" if (lang or current_language()) == "en" else "DD.MM.YYYY"
+    return "YYYY-MM-DD" if (lang or current_language(cfg)) == "en" else "DD.MM.YYYY"
 
 
 def format_number(cfg, value: float | Decimal | None, digits: int = 1, *, lang: str | None = None) -> str:
     if value is None:
         return "–"
     text = f"{float(value):.{digits}f}"
-    return text if (lang or current_language()) == "en" else text.replace(".", ",")
+    return text if (lang or current_language(cfg)) == "en" else text.replace(".", ",")
 
 
 def error_message(cfg, error: Exception | str, *, lang: str | None = None) -> str:
     text = str(error)
-    if (lang or current_language()) != "en":
+    if (lang or current_language(cfg)) != "en":
         return text
     if text in cfg.ERROR_TRANSLATIONS:
         return cfg.ERROR_TRANSLATIONS[text]
