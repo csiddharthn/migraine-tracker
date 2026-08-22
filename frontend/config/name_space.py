@@ -50,6 +50,7 @@ class cfg:
     "6": "Heat / high outdoor temperature",
     "7": "Late and insufficient sleep",
     "8": "Uncertain",
+    "P1": "Personal trigger",
     "ND": "Not documented (legacy)",
     }
 
