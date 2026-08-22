@@ -503,7 +503,7 @@ def _symptom_defaults(existing: MigraineEntry | None) -> list[str]:
     if existing is None:
         return []
     defaults = [f"aura:{code}" for code in AURA_CODES if code in existing.aura_codes]
-    defaults.extend(f"symptom:{field}" for field in CORE_SYMPTOMS if getattr(cfg, existing, field))
+    defaults.extend(f"symptom:{field}" for field in CORE_SYMPTOMS if getattr(existing, field))
     defaults.extend(f"other:{code}" for code in OTHER_SYMPTOM_CODES if code in existing.other_symptom_codes)
     return defaults
 
