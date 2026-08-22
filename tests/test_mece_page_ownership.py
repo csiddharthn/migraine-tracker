@@ -52,6 +52,7 @@ def test_domain_specific_charts_have_one_page_owner() -> None:
     page_sources = {
         path.stem: path.read_text(encoding="utf-8")
         for path in PAGES_DIR.glob("*.py")
+        if path.stem != "__init__"
     }
     for chart_name, expected_owner in EXPECTED_OWNERS.items():
         owners = {page_name for page_name, source in page_sources.items() if chart_name in source}

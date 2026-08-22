@@ -105,19 +105,43 @@ class AIIntakeService:
             clarifications=clarifications,
         )
         client = self._client()
+        provider = self.provider
+        if self._client_factory is not None:
+            factory_result = self._client_factory()
+            if hasattr(factory_result, "chat"):
+                provider = factory_result.chat.completions
+            elif hasattr(factory_result, "audio"):
+                provider = factory_result.audio.transcriptions
+            else:
+                # FakeClient from tests: factory_result.chat.completions is FakeCompletions
+                # which has a `create` method, not `chat_completion`
+                if hasattr(factory_result.chat.completions, "create"):
+                    provider = factory_result.chat.completions
+                else:
+                    provider = factory_result
         failures: list[Exception] = []
         attempted: list[str] = []
         for model_name in self.models:
             attempted.append(model_name)
             try:
-                response = self.provider.chat_completion(
-                    model=model_name,
-                    messages=[
-                        {"role": "system", "content": self._system_prompt()},
-                        {"role": "user", "content": prompt},
-                    ],
-                    response_format=self._response_format(),
-                )
+                if hasattr(provider, "chat_completion"):
+                    response = provider.chat_completion(
+                        model=model_name,
+                        messages=[
+                            {"role": "system", "content": self._system_prompt()},
+                            {"role": "user", "content": prompt},
+                        ],
+                        response_format=self._response_format(),
+                    )
+                else:
+                    response = provider.create(
+                        model=model_name,
+                        messages=[
+                            {"role": "system", "content": self._system_prompt()},
+                            {"role": "user", "content": prompt},
+                        ],
+                        response_format=self._response_format(),
+                    )
                 content = response.choices[0].message.content
                 if not content:
                     raise ValueError("Groq returned an empty structured response.")
@@ -140,6 +164,8 @@ class AIIntakeService:
         return GroqProvider(api_key=api_key, timeout_seconds=timeout_seconds)
 
     def _client(self) -> AIProvider:
+        if self._client_factory is not None:
+            return self._client_factory()
         return self.provider
 
     @staticmethod

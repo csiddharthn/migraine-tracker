@@ -66,6 +66,12 @@ class GroqTranscriptionService:
             raise AITranscriptionError("Die Audioaufnahme ist größer als das für den kostenlosen Tarif erlaubte Limit.")
 
         provider = self.provider
+        if self._client_factory is not None:
+            client = self._client_factory()
+            if hasattr(client, "audio"):
+                provider = client.audio.transcriptions
+            else:
+                provider = client
         failures: list[Exception] = []
         attempted: list[str] = []
         for model_name in self.models:
@@ -84,11 +90,18 @@ class GroqTranscriptionService:
                 }
                 if language:
                     arguments["language"] = language
-                response = provider.audio_transcription(
-                    file=(filename, audio),
-                    model=model_name,
-                    **{k: v for k, v in arguments.items() if k not in ("file", "model")},
-                )
+                if hasattr(provider, "audio_transcription"):
+                    response = provider.audio_transcription(
+                        file=(filename, audio),
+                        model=model_name,
+                        **{k: v for k, v in arguments.items() if k not in ("file", "model")},
+                    )
+                else:
+                    response = provider.create(
+                        file=(filename, audio),
+                        model=model_name,
+                        **{k: v for k, v in arguments.items() if k not in ("file", "model")},
+                    )
                 transcript = str(response.text).strip()
                 if not transcript:
                     raise ValueError("Groq returned an empty transcription.")
