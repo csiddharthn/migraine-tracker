@@ -419,7 +419,7 @@ def render_interpretation_review(entry: MigraineEntry) -> dict[str, Any] | None:
         peak_start = _minute_control(tr(cfg, "Höhepunkt Beginn", "Peak start"), interpretation.peak_start_minute, "peak_start")
         peak_end = _minute_control(tr(cfg, "Höhepunkt Ende", "Peak end"), interpretation.peak_end_minute, "peak_end")
         end = _minute_control(tr(cfg, "Ende", "End"), interpretation.end_minute, "end")
-        laterality = st.selectbox(tr(cfg, "Automatisch erkannte Schmerzseite", "Automatically recognised side of pain"), DERIVED_LATERALITIES, index=_choice_index(DERIVED_LATERALITIES, interpretation.laterality), format_func=derived_laterality_label)
+        laterality = st.selectbox(tr(cfg, "Automatisch erkannte Schmerzseite", "Automatically recognised side of pain"), DERIVED_LATERALITIES, index=_choice_index(DERIVED_LATERALITIES, interpretation.laterality), format_func=lambda code: derived_laterality_label(cfg, code))
         side_detail = st.text_input(tr(cfg, "Genauere Angabe zur Schmerzseite", "More detail about the side of pain"), value=localize_value(cfg, interpretation.side_detail or ""))
         contexts = st.text_area(tr(cfg, "Erkannte Begleitumstände (eine Angabe pro Zeile)", "Recognised circumstances (one item per line)"), value="\n".join(str(localize_value(cfg, value)) for value in interpretation.contexts), height=110)
         symptoms = st.text_area(tr(cfg, "Erkannte Symptome (eine Angabe pro Zeile)", "Recognised symptoms (one item per line)"), value="\n".join(str(localize_value(cfg, value)) for value in interpretation.symptoms), height=90)
