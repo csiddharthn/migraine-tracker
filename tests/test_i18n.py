@@ -10,25 +10,54 @@ from frontend.i18n import (
     month_label,
     trigger_text,
 )
+LANG_DE = "de"
+LANG_EN = "en"
+
+# Month / date test values
+MONTH_2026_06 = "2026-06"
+MONTH_LABEL_DE = "Juni 2026"
+MONTH_LABEL_EN = "June 2026"
+DATE_2026_06_09 = date(2026, 6, 9)
+DATE_FORMAT_DE = "09.06.2026"
+DATE_FORMAT_EN = "2026-06-09"
+
+# Number formatting
+NUMBER_VALUE = 5.25
+NUMBER_PRECISION = 2
+NUMBER_FORMAT_DE = "5,25"
+NUMBER_FORMAT_EN = "5.25"
+
+# Localization values
+CANONICAL_COLD_DRAFT = "Kälte / Zugluft"
+TRANSLATED_COLD_DRAFT = "Cold / draught"
+CANONICAL_RIGHT_EYE = "rechts, im Bereich des rechten Auges"
+TRANSLATED_RIGHT_EYE = "right, around the right eye"
+
+# Trigger codes and labels
+TRIGGER_CODE_5 = "5"
+TRIGGER_LABEL_5_DE = "Kalte Schlafumgebung / Fenster offen"
+TRIGGER_LABEL_5_EN = "Cold sleeping environment / open window"
+TRIGGER_CODE_P1 = "P1"
+TRIGGER_LABEL_P1_DE = "Eigener Auslöser"
 
 
 def test_month_date_and_number_formats_follow_language() -> None:
-    assert month_label("2026-06", lang="de") == "Juni 2026"
-    assert month_label("2026-06", lang="en") == "June 2026"
-    assert format_date_value(date(2026, 6, 9), lang="de") == "09.06.2026"
-    assert format_date_value(date(2026, 6, 9), lang="en") == "2026-06-09"
-    assert format_number(5.25, 2, lang="de") == "5,25"
-    assert format_number(5.25, 2, lang="en") == "5.25"
+    assert month_label(MONTH_2026_06, lang=LANG_DE) == MONTH_LABEL_DE
+    assert month_label(MONTH_2026_06, lang=LANG_EN) == MONTH_LABEL_EN
+    assert format_date_value(DATE_2026_06_09, lang=LANG_DE) == DATE_FORMAT_DE
+    assert format_date_value(DATE_2026_06_09, lang=LANG_EN) == DATE_FORMAT_EN
+    assert format_number(NUMBER_VALUE, NUMBER_PRECISION, lang=LANG_DE) == NUMBER_FORMAT_DE
+    assert format_number(NUMBER_VALUE, NUMBER_PRECISION, lang=LANG_EN) == NUMBER_FORMAT_EN
 
 
 def test_stored_values_are_localized_without_changing_the_canonical_value() -> None:
-    translated = localize_value("Kälte / Zugluft", lang="en")
+    translated = localize_value(CANONICAL_COLD_DRAFT, lang=LANG_EN)
 
-    assert translated == "Cold / draught"
-    assert canonical_value(translated, lang="en") == "Kälte / Zugluft"
-    assert localize_value("rechts, im Bereich des rechten Auges", lang="en") == "right, around the right eye"
+    assert translated == TRANSLATED_COLD_DRAFT
+    assert canonical_value(translated, lang=LANG_EN) == CANONICAL_COLD_DRAFT
+    assert localize_value(CANONICAL_RIGHT_EYE, lang=LANG_EN) == TRANSLATED_RIGHT_EYE
 
 
 def test_builtin_trigger_labels_are_localized_by_stable_code() -> None:
-    assert trigger_text("5", "Kalte Schlafumgebung / Fenster offen", lang="en") == "Cold sleeping environment / open window"
-    assert trigger_text("P1", "Eigener Auslöser", lang="en") == "Eigener Auslöser"
+    assert trigger_text(TRIGGER_CODE_5, TRIGGER_LABEL_5_DE, lang=LANG_EN) == TRIGGER_LABEL_5_EN
+    assert trigger_text(TRIGGER_CODE_P1, TRIGGER_LABEL_P1_DE, lang=LANG_EN) == TRIGGER_LABEL_P1_DE
