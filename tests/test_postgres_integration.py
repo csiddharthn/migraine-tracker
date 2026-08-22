@@ -16,6 +16,22 @@ from backend.services.entry_service import EntryService
 from backend.services.schemas import EntryInput, EntryPatch, MedicationInput
 from backend.services.user_service import UserService
 
+TEST_USER_NAME = "PostgreSQL-Testperson"
+TEST_USER_BIRTH = date(2026, 8, 1)
+TEST_ENTRY_DATE = date(2026, 8, 10)
+TEST_TRIGGER_CODE = "8"
+TEST_STRENGTH = 5
+TEST_DURATION = Decimal("7.0")
+TEST_MEDICATIONS = [
+    MedicationInput(name="Eletriptan", taken_at=time(16, 0)),
+    MedicationInput(name="Amitriptylin neuraxpharm", taken_at=time(22, 0)),
+]
+TEST_NOTES = "Beginn 15:00 Uhr, rechts; Ende 22:00 Uhr."
+UPDATED_STRENGTH = 6
+EXPECTED_DURATION = Decimal("7.00")
+EXPECTED_MEDICATION_NAMES = ["Eletriptan", "Amitriptylin neuraxpharm"]
+EXPECTED_ONSET_MINUTE = 15 * 60
+EXPECTED_END_MINUTE = 22 * 60
 
 @pytest.mark.postgres
 def test_postgres_create_and_update_in_isolated_schema() -> None:
@@ -40,30 +56,27 @@ def test_postgres_create_and_update_in_isolated_schema() -> None:
         factory = sessionmaker(bind=test_engine, expire_on_commit=False)
         with factory.begin() as session:
             seed_reference_data(session)
-            user = UserService(session).create("PostgreSQL-Testperson", date(2026, 8, 1))
+            user = UserService(session).create(TEST_USER_NAME, TEST_USER_BIRTH)
             service = EntryService(session, user.id)
             entry = service.create(
                 EntryInput(
-                    entry_date=date(2026, 8, 10),
-                    trigger_codes=["8"],
-                    strength=5,
-                    duration_hours=Decimal("7.0"),
-                    medications=[
-                        MedicationInput(name="Eletriptan", taken_at=time(16, 0)),
-                        MedicationInput(name="Amitriptylin neuraxpharm", taken_at=time(22, 0)),
-                    ],
-                    notes="Beginn 15:00 Uhr, rechts; Ende 22:00 Uhr.",
+                    entry_date=TEST_ENTRY_DATE,
+                    trigger_codes=[TEST_TRIGGER_CODE],
+                    strength=TEST_STRENGTH,
+                    duration_hours=TEST_DURATION,
+                    medications=TEST_MEDICATIONS,
+                    notes=TEST_NOTES,
                 )
             )
             entry_id = entry.id
 
         with factory.begin() as session:
-            updated = EntryService(session, user.id).update(entry_id, EntryPatch(strength=6))
-            assert updated.strength == 6
-            assert updated.duration_hours == Decimal("7.00")
-            assert [item.name for item in updated.medications] == ["Eletriptan", "Amitriptylin neuraxpharm"]
-            assert updated.interpretation.onset_minute == 15 * 60
-            assert updated.interpretation.end_minute == 22 * 60
+            updated = EntryService(session, user.id).update(entry_id, EntryPatch(strength=UPDATED_STRENGTH))
+            assert updated.strength == UPDATED_STRENGTH
+            assert updated.duration_hours == EXPECTED_DURATION
+            assert [item.name for item in updated.medications] == EXPECTED_MEDICATION_NAMES
+            assert updated.interpretation.onset_minute == EXPECTED_ONSET_MINUTE
+            assert updated.interpretation.end_minute == EXPECTED_END_MINUTE
     finally:
         test_engine.dispose()
         with admin_engine.begin() as connection:

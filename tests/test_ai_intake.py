@@ -8,8 +8,26 @@ import pytest
 from backend.ai_intake import AIIntakeDraft, AIIntakeError, AIIntakeService, AIMedicationDraft, AITimelineRow
 from backend.models import TriggerDefinition
 
+TEST_KEY = "test-key"
+TEST_MODEL = "test-model"
+ENTRY_DATE = date(2026, 8, 10)
+CURRENT_DATE = date(2026, 8, 11)
 
-def trigger(code: str, label: str) -> TriggerDefinition:
+
+@pytest.fixture
+def ai_service_factory():
+    def make_service(**overrides):
+        defaults = {
+            "api_key": TEST_KEY,
+            "model": TEST_MODEL,
+            "prompt_version": "test-v1",
+        }
+        defaults.update(overrides)
+        return AIIntakeService(**defaults)
+    return make_service
+
+
+def make_trigger(code: str, label: str) -> TriggerDefinition:
     return TriggerDefinition(code=code, label=label, description="", sort_order=int(code), active=True)
 
 
@@ -33,8 +51,10 @@ class FakeClient:
 
 
 def test_ai_intake_extracts_typed_draft_and_normalizes_triggers() -> None:
+    entry_date = ENTRY_DATE
+    current_date = CURRENT_DATE
     parsed = AIIntakeDraft(
-        entry_date=date(2026, 8, 10),
+        entry_date=entry_date,
         strength=7,
         duration_hours=5.5,
         trigger_codes=["5", "unknown"],
@@ -46,19 +66,20 @@ def test_ai_intake_extracts_typed_draft_and_normalizes_triggers() -> None:
         peak_time="11:00",
         peak_duration_minutes=60,
     )
-    client = FakeClient({"test-model": parsed})
+    test_model = TEST_MODEL
+    client = FakeClient({test_model: parsed})
     service = AIIntakeService(
-        api_key="test-key",
-        model="test-model",
+        api_key=TEST_KEY,
+        model=test_model,
         prompt_version="test-v1",
         client_factory=lambda **_: client,
     )
 
     draft = service.extract(
         "Gestern begann der Kopfschmerz um 08:30 Uhr.",
-        trigger_definitions=[trigger("5", "Kalte Schlafumgebung")],
+        trigger_definitions=[make_trigger("5", "Kalte Schlafumgebung")],
         medication_names=["Eletriptan"],
-        current_date=date(2026, 8, 11),
+        current_date=current_date,
     )
 
     assert draft.trigger_codes == ["5"]
@@ -66,28 +87,31 @@ def test_ai_intake_extracts_typed_draft_and_normalizes_triggers() -> None:
     assert draft.medications[0].taken_at_value().isoformat(timespec="minutes") == "10:15"
     assert draft.structured_notes().timeline[0].start_time.isoformat(timespec="minutes") == "08:30"
     request = client.chat.completions.arguments[0]
-    assert request["model"] == "test-model"
+    assert request["model"] == test_model
     assert request["response_format"]["json_schema"]["strict"] is True
     assert "Kalte Schlafumgebung" in request["messages"][1]["content"]
     assert "Translate all user-visible free text into clear, natural German" in request["messages"][0]["content"]
     assert "medication dose/form" in request["messages"][0]["content"]
-    assert service.model_used == "test-model"
+    assert service.model_used == test_model
 
 
 def test_ai_intake_adds_questions_only_for_missing_required_fields() -> None:
-    client = FakeClient({"test-model": AIIntakeDraft(possible_factors="Schlechter Schlaf")})
+    missing_fields_draft = AIIntakeDraft(possible_factors="Mögliche Faktoren")
+    service_model = TEST_MODEL
+    client = FakeClient({service_model: missing_fields_draft})
     service = AIIntakeService(
-        api_key="test-key",
-        model="test-model",
+        api_key=TEST_KEY,
+        model=service_model,
         prompt_version="test-v1",
         client_factory=lambda **_: client,
     )
 
+    current_date = CURRENT_DATE
     draft = service.extract(
-        "Schlechter Schlaf.",
-        trigger_definitions=[trigger("8", "Unsicher")],
+        "Kurze Beschreibung.",
+        trigger_definitions=[make_trigger("8", "Unsicher")],
         medication_names=[],
-        current_date=date(2026, 8, 11),
+        current_date=current_date,
     )
 
     assert [question.field for question in draft.clarification_questions] == [
@@ -103,48 +127,53 @@ def test_ai_intake_rejects_empty_key_and_empty_narrative() -> None:
         AIIntakeService(api_key=" ", model="test", prompt_version="1")
 
     service = AIIntakeService(
-        api_key="test-key",
-        model="test-model",
+        api_key=TEST_KEY,
+        model=TEST_MODEL,
         prompt_version="test-v1",
-        client_factory=lambda **_: FakeClient({"test-model": AIIntakeDraft()}),
+        client_factory=lambda **_: FakeClient({TEST_MODEL: AIIntakeDraft()}),
     )
+    current_date = CURRENT_DATE
     with pytest.raises(AIIntakeError):
-        service.extract(" ", trigger_definitions=[], medication_names=[], current_date=date(2026, 8, 11))
+        service.extract(" ", trigger_definitions=[], medication_names=[], current_date=current_date)
 
 
 def test_ai_intake_uses_next_groq_model_after_failure() -> None:
+    entry_date = ENTRY_DATE
     parsed = AIIntakeDraft(
-        entry_date=date(2026, 8, 10),
+        entry_date=entry_date,
         strength=5,
-        duration_hours=4,
+        duration_hours=4.0,
         trigger_codes=["8"],
     )
+    primary_model = "gpt-120b"
+    fallback_model = "gpt-20b"
     client = FakeClient(
         {
-            "openai/gpt-oss-120b": RuntimeError("rate limited"),
-            "openai/gpt-oss-20b": parsed,
+            primary_model: RuntimeError("rate limited"),
+            fallback_model: parsed,
         }
     )
     service = AIIntakeService(
-        api_key="test-key",
-        models=["openai/gpt-oss-120b", "openai/gpt-oss-20b"],
+        api_key=TEST_KEY,
+        models=[primary_model, fallback_model],
         prompt_version="test-v1",
         client_factory=lambda **_: client,
     )
 
+    current_date = CURRENT_DATE
     draft = service.extract(
-        "Am 10. August hatte ich vier Stunden lang Kopfschmerzen der Stärke 5.",
-        trigger_definitions=[trigger("8", "Unsicher")],
+        "Lange Beschreibung des Kopfschmerzes.",
+        trigger_definitions=[make_trigger("8", "Unsicher")],
         medication_names=[],
-        current_date=date(2026, 8, 11),
+        current_date=current_date,
     )
 
     assert draft.strength == 5
-    assert service.model_used == "openai/gpt-oss-20b"
-    assert service.attempted_models == ("openai/gpt-oss-120b", "openai/gpt-oss-20b")
+    assert service.model_used == fallback_model
+    assert service.attempted_models == (primary_model, fallback_model)
     assert [request["model"] for request in client.chat.completions.arguments] == [
-        "openai/gpt-oss-120b",
-        "openai/gpt-oss-20b",
+        primary_model,
+        fallback_model,
     ]
 
 

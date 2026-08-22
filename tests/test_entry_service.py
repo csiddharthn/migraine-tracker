@@ -10,18 +10,29 @@ from backend.services.entry_service import DuplicateEntryError, EntryService
 from backend.services.schemas import EntryInput, EntryPatch, MedicationInput
 from backend.models import DailyRecord
 
+ENTRY_DATE = date(2026, 8, 10)
+TRIGGER_CODE = "8"
+STRENGTH = 5
+DURATION_HOURS = Decimal("7.0")
+PAIN_TYPE = "Dumpf / drückend"
+LATERALITY = "Rechts"
+MEDICATION_NAME = "Eletriptan"
+MEDICATION_TIME = time(15, 30)
+NOTES = "Ca. 15:00 Uhr: Beginn der Kopfschmerzen ausschließlich auf der rechten Kopfseite."
+MOMEALLERG_NASAL_SPRAY = True
+
 
 def payload() -> EntryInput:
     return EntryInput(
-        entry_date=date(2026, 8, 10),
-        trigger_codes=["8"],
-        strength=5,
-        duration_hours=Decimal("7.0"),
-        pain_type="Dumpf / drückend",
-        entered_laterality="Rechts",
-        medications=[MedicationInput(name="Eletriptan", taken_at=time(15, 30))],
-        notes="Ca. 15:00 Uhr: Beginn der Kopfschmerzen ausschließlich auf der rechten Kopfseite.",
-        momeallerg_nasal_spray=True,
+        entry_date=ENTRY_DATE,
+        trigger_codes=[TRIGGER_CODE],
+        strength=STRENGTH,
+        duration_hours=DURATION_HOURS,
+        pain_type=PAIN_TYPE,
+        entered_laterality=LATERALITY,
+        medications=[MedicationInput(name=MEDICATION_NAME, taken_at=MEDICATION_TIME)],
+        notes=NOTES,
+        momeallerg_nasal_spray=MOMEALLERG_NASAL_SPRAY,
     )
 
 
@@ -30,14 +41,14 @@ def test_create_and_duplicate_prevention(session, user) -> None:
     entry = service.create(payload())
     session.commit()
 
-    assert entry.entry_date == date(2026, 8, 10)
-    assert [trigger.trigger_code for trigger in entry.triggers] == ["8"]
+    assert entry.entry_date == ENTRY_DATE
+    assert [trigger.trigger_code for trigger in entry.triggers] == [TRIGGER_CODE]
     assert entry.interpretation is not None
-    assert entry.interpretation.laterality == "rechts"
+    assert entry.interpretation.laterality == LATERALITY.lower()
     assert entry.interpretation.onset_minute == 15 * 60
-    assert entry.medications[0].taken_at == time(15, 30)
-    assert service.repository.list_medication_names() == ["Eletriptan"]
-    assert service.repository.get_daily_record(entry.entry_date).momeallerg_nasal_spray is True
+    assert entry.medications[0].taken_at == MEDICATION_TIME
+    assert service.repository.list_medication_names() == [MEDICATION_NAME]
+    assert service.repository.get_daily_record(entry.entry_date).momeallerg_nasal_spray is MOMEALLERG_NASAL_SPRAY
 
     with pytest.raises(DuplicateEntryError):
         service.create(payload())

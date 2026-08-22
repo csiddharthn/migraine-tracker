@@ -20,11 +20,40 @@ from frontend.components.charts import (
 )
 
 
+
+LANG_EN = "en"
+LANG_DE = "de"
+
+
+@pytest.fixture
+def chart_entries_factory():
+    def make_entries(**overrides):
+        defaults = [
+            SimpleNamespace(entry_date=date(2026, 6, 9), duration_hours=Decimal("5.0"), strength=6),
+            SimpleNamespace(entry_date=date(2026, 6, 10), duration_hours=Decimal("7.0"), strength=9),
+        ]
+        # Allow overriding by providing a full list; otherwise return defaults
+        if "entries" in overrides:
+            return overrides["entries"]
+        return defaults
+    return make_entries
+
+
+@pytest.fixture
+def chart_entries():
+    return [
+        SimpleNamespace(entry_date=date(2026, 6, 9), duration_hours=Decimal("5.0"), strength=6),
+        SimpleNamespace(entry_date=date(2026, 6, 10), duration_hours=Decimal("7.0"), strength=9),
+    ]
+
+
 def test_observation_days_bar_reconciles_headache_free_and_total_days() -> None:
-    figure = observation_days_bar(19, 52, lang="en")
+    headache_days = 19
+    free_days = 52
+    figure = observation_days_bar(headache_days, free_days, lang="en")
 
     assert [trace.name for trace in figure.data] == ["Headache days", "Headache-free days"]
-    assert [trace.x[0] for trace in figure.data] == [19, 52]
+    assert [trace.x[0] for trace in figure.data] == [headache_days, free_days]
     assert [trace.text[0] for trace in figure.data] == ["<b>19</b><br>27%", "<b>52</b><br>73%"]
     assert figure.layout.barmode == "stack"
     assert figure.layout.legend.traceorder == "normal"

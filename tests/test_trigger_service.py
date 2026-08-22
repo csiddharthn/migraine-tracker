@@ -4,28 +4,38 @@ import pytest
 
 from backend.services.trigger_service import DuplicateTriggerError, TriggerService
 
+TRIGGER_LABEL_FIRST = "Unregelmäßige Mahlzeit"
+TRIGGER_DESC_FIRST = "Lange Pause zwischen Mahlzeiten"
+TRIGGER_LABEL_SECOND = "Bildschirmbelastung"
+TRIGGER_CODE_FIRST = "9"
+TRIGGER_SORT_FIRST = 9
+TRIGGER_CODE_SECOND = "10"
+TRIGGER_SORT_SECOND = 10
+DUPLICATE_LABEL_VARIANT = "  unregelmäßige   mahlzeit  "
+BLANK_LABEL = " "
+
 
 def test_trigger_service_creates_next_global_code(session) -> None:
     service = TriggerService(session)
 
-    first = service.create("Unregelmäßige Mahlzeit", "Lange Pause zwischen Mahlzeiten")
-    second = service.create("Bildschirmbelastung")
+    first = service.create(TRIGGER_LABEL_FIRST, TRIGGER_DESC_FIRST)
+    second = service.create(TRIGGER_LABEL_SECOND)
 
-    assert first.code == "9"
-    assert first.sort_order == 9
+    assert first.code == TRIGGER_CODE_FIRST
+    assert first.sort_order == TRIGGER_SORT_FIRST
     assert first.active is True
-    assert second.code == "10"
+    assert second.code == TRIGGER_CODE_SECOND
     assert [item.label for item in service.repository.list_all() if item.active][-2:] == [
-        "Unregelmäßige Mahlzeit",
-        "Bildschirmbelastung",
+        TRIGGER_LABEL_FIRST,
+        TRIGGER_LABEL_SECOND,
     ]
 
 
 def test_trigger_service_rejects_duplicate_and_blank_labels(session) -> None:
     service = TriggerService(session)
-    service.create("Unregelmäßige Mahlzeit")
+    service.create(TRIGGER_LABEL_FIRST)
 
     with pytest.raises(DuplicateTriggerError):
-        service.create("  unregelmäßige   mahlzeit  ")
+        service.create(DUPLICATE_LABEL_VARIANT)
     with pytest.raises(ValueError):
-        service.create(" ")
+        service.create(BLANK_LABEL)

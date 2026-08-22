@@ -2,32 +2,46 @@ from __future__ import annotations
 
 from backend.note_interpretation import NoteInterpreter
 
+NOTES_FULL = (
+    "Ca. 15:00 Uhr: Beginn der Kopfschmerzen. "
+    "Ca. 17:00–20:00 Uhr: Kopfschmerzen blieben auf ihrer höchsten Intensität. "
+    "Ca. 21:30–22:00 Uhr: Kopfschmerzen vollständig verschwunden. "
+    "Ausschließlich auf der rechten Kopfseite. Unterbrochener Schlaf durch Unruhe."
+)
+LATERALITY_RIGHT = "Rechts"
+ONSET_MINUTE = 15 * 60
+PEAK_START_MINUTE = 17 * 60
+PEAK_END_MINUTE = 20 * 60
+END_MINUTE = 22 * 60
+EXPECTED_CONTEXT = "Unterbrochener Schlaf / Unruhe"
+
 
 def test_shared_uhr_ranges_and_laterality_are_extracted() -> None:
-    notes = (
-        "Ca. 15:00 Uhr: Beginn der Kopfschmerzen. "
-        "Ca. 17:00–20:00 Uhr: Kopfschmerzen blieben auf ihrer höchsten Intensität. "
-        "Ca. 21:30–22:00 Uhr: Kopfschmerzen vollständig verschwunden. "
-        "Ausschließlich auf der rechten Kopfseite. Unterbrochener Schlaf durch Unruhe."
-    )
-    result = NoteInterpreter().interpret(notes, "Rechts")
-
-    assert result.onset_minute == 15 * 60
-    assert result.peak_start_minute == 17 * 60
-    assert result.peak_end_minute == 20 * 60
-    assert result.end_minute == 22 * 60
+    result = NoteInterpreter().interpret(NOTES_FULL, LATERALITY_RIGHT)
+    assert result.onset_minute == ONSET_MINUTE
+    assert result.peak_start_minute == PEAK_START_MINUTE
+    assert result.peak_end_minute == PEAK_END_MINUTE
+    assert result.end_minute == END_MINUTE
     assert result.laterality == "rechts"
-    assert "Unterbrochener Schlaf / Unruhe" in result.contexts
+    assert EXPECTED_CONTEXT in result.contexts
+
+
+LEGACY_NOTES = "Original bleibt unberührt"
+LEGACY_LATERALITY = "Einseitig"
+LEGACY_ANNOTATION = {
+    "onsetHour": 14.5,
+    "endHour": 26,
+    "laterality": "links",
+    "contexts": ["Kälte / Zugluft"],
+}
+ONSET_MINUTE_LEGACY = 870
+END_MINUTE_LEGACY = 1560
 
 
 def test_reviewed_legacy_hours_are_converted_to_minutes() -> None:
-    result = NoteInterpreter().interpret(
-        "Original bleibt unberührt",
-        "Einseitig",
-        {"onsetHour": 14.5, "endHour": 26, "laterality": "links", "contexts": ["Kälte / Zugluft"]},
-    )
-    assert result.onset_minute == 870
-    assert result.end_minute == 1560
+    result = NoteInterpreter().interpret(LEGACY_NOTES, LEGACY_LATERALITY, LEGACY_ANNOTATION)
+    assert result.onset_minute == ONSET_MINUTE_LEGACY
+    assert result.end_minute == END_MINUTE_LEGACY
     assert result.extraction_method == "semantisch geprüft"
 
 
