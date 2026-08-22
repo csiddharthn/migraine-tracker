@@ -302,6 +302,10 @@ class cfg:
     "Vollständig": "Complete",
     "Gesamt": "Total",
     "Zeilen": "Rows",
+    "Zeitlicher Ablauf": "Timeline",
+    "Mögliche Einflussfaktoren": "Possible factors",
+    "Beschwerden und Maßnahmen": "Symptoms and actions",
+    "Andere Notizen": "Other notes",
     "Hinweis": "Issue",
     }
 
