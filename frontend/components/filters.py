@@ -7,19 +7,20 @@ from typing import Iterable
 import streamlit as st
 
 from backend.models import UserProfile
+from frontend.config.name_space import cfg
 from frontend.i18n import date_input_format, tr
 
 
 def render_report_period(user: UserProfile) -> tuple[date, date]:
     default = (user.tracking_start_date, date.today())
     with st.sidebar:
-        st.subheader(tr("Zeitraum", "Date range"))
+        st.subheader(tr(cfg, "Zeitraum", "Date range"))
         selected = st.date_input(
-            tr("Auswertungszeitraum", "Reporting period"),
+            tr(cfg, "Auswertungszeitraum", "Reporting period"),
             value=default,
             min_value=user.tracking_start_date,
             max_value=date.today(),
-            format=date_input_format(),
+            format=date_input_format(cfg, ),
             key=f"report_period_{user.id}",
         )
     return _date_range(selected, default)

@@ -10,10 +10,10 @@ from typing import Any, Callable, Iterable
 from backend.models import DailyRecord, MigraineEntry
 
 
-from backend.config import name_space
+from backend.config.name_space import cfg
 
-WEEKDAYS = name_space.WEEKDAYS
-LATERALITY_LABELS = name_space.LATERALITY_LABELS
+WEEKDAYS = cfg.WEEKDAYS
+LATERALITY_LABELS = cfg.LATERALITY_LABELS
 
 
 @dataclass(frozen=True)

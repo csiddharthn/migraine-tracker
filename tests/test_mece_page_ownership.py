@@ -32,12 +32,12 @@ def test_domain_specific_charts_have_one_page_owner() -> None:
 def test_navigation_names_reflect_the_mece_domains() -> None:
     app_source = (PROJECT_ROOT / "app.py").read_text(encoding="utf-8")
 
-    assert 'tr("Verlauf und Muster", "Trends and patterns")' in app_source
-    assert 'tr("Merkmale und Behandlung", "Characteristics and treatment")' in app_source
-    assert 'tr("Einträge und Daten", "Entries and data")' in app_source
-    assert 'tr("Häufigkeit im Zeitverlauf", "Frequency over time")' in app_source
-    assert 'tr("Tagesverlauf der Kopfschmerzen", "Timing of headaches")' in app_source
-    assert 'tr("Mögliche Auslöser", "Possible triggers")' in app_source
+    assert 'tr(cfg, "Verlauf und Muster", "Trends and patterns")' in app_source
+    assert 'tr(cfg, "Merkmale und Behandlung", "Characteristics and treatment")' in app_source
+    assert 'tr(cfg, "Einträge und Daten", "Entries and data")' in app_source
+    assert 'tr(cfg, "Häufigkeit im Zeitverlauf", "Frequency over time")' in app_source
+    assert 'tr(cfg, "Tagesverlauf der Kopfschmerzen", "Timing of headaches")' in app_source
+    assert 'tr(cfg, "Mögliche Auslöser", "Possible triggers")' in app_source
 
 
 def test_report_pages_avoid_unexplained_technical_headings() -> None:

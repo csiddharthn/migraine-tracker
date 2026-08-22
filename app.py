@@ -7,6 +7,7 @@ import streamlit as st
 from frontend.components.filters import render_report_period
 from frontend.components.state import database_session
 from frontend.components.users import render_user_settings
+from frontend.config.name_space import cfg
 from frontend.i18n import LANGUAGE_LABELS, tr
 
 
@@ -16,7 +17,7 @@ if st.session_state.get("app_language") not in LANGUAGE_LABELS:
     st.session_state["app_language"] = "de"
 
 st.set_page_config(
-    page_title=tr("Kopfschmerz-Tracker", "Headache Tracker"),
+    page_title=tr(cfg, "Kopfschmerz-Tracker", "Headache Tracker"),
     page_icon=str(ICON),
     layout="wide",
     initial_sidebar_state="auto",
@@ -24,28 +25,28 @@ st.set_page_config(
 
 page_sections = [
     (
-        tr("Verlauf und Muster", "Trends and patterns"),
+        tr(cfg, "Verlauf und Muster", "Trends and patterns"),
         [
-            ("frontend/pages/overview.py", tr("Übersicht", "Overview"), ":material/dashboard:", True),
-            ("frontend/pages/trends.py", tr("Häufigkeit im Zeitverlauf", "Frequency over time"), ":material/show_chart:", False),
-            ("frontend/pages/attack_timeline.py", tr("Tagesverlauf der Kopfschmerzen", "Timing of headaches"), ":material/timeline:", False),
+            ("frontend/pages/overview.py", tr(cfg, "Übersicht", "Overview"), ":material/dashboard:", True),
+            ("frontend/pages/trends.py", tr(cfg, "Häufigkeit im Zeitverlauf", "Frequency over time"), ":material/show_chart:", False),
+            ("frontend/pages/attack_timeline.py", tr(cfg, "Tagesverlauf der Kopfschmerzen", "Timing of headaches"), ":material/timeline:", False),
         ],
     ),
     (
-        tr("Merkmale und Behandlung", "Characteristics and treatment"),
+        tr(cfg, "Merkmale und Behandlung", "Characteristics and treatment"),
         [
-            ("frontend/pages/strength_duration.py", tr("Stärke und Dauer", "Intensity and duration"), ":material/scatter_plot:", False),
-            ("frontend/pages/triggers_context.py", tr("Mögliche Auslöser", "Possible triggers"), ":material/psychology:", False),
-            ("frontend/pages/pain_symptoms.py", tr("Schmerzart und Symptome", "Pain characteristics and symptoms"), ":material/neurology:", False),
-            ("frontend/pages/medication.py", tr("Medikamente und Behandlung", "Medication and treatment"), ":material/medication:", False),
+            ("frontend/pages/strength_duration.py", tr(cfg, "Stärke und Dauer", "Intensity and duration"), ":material/scatter_plot:", False),
+            ("frontend/pages/triggers_context.py", tr(cfg, "Mögliche Auslöser", "Possible triggers"), ":material/psychology:", False),
+            ("frontend/pages/pain_symptoms.py", tr(cfg, "Schmerzart und Symptome", "Pain characteristics and symptoms"), ":material/neurology:", False),
+            ("frontend/pages/medication.py", tr(cfg, "Medikamente und Behandlung", "Medication and treatment"), ":material/medication:", False),
         ],
     ),
     (
-        tr("Einträge und Daten", "Entries and data"),
+        tr(cfg, "Einträge und Daten", "Entries and data"),
         [
-            ("frontend/pages/entries.py", tr("Einträge", "Entries"), ":material/edit_note:", False),
-            ("frontend/pages/database.py", tr("Gespeicherte Daten", "Stored data"), ":material/database:", False),
-            ("frontend/pages/data_quality.py", tr("Datenprüfung und Berechnung", "Data checks and calculations"), ":material/fact_check:", False),
+            ("frontend/pages/entries.py", tr(cfg, "Einträge", "Entries"), ":material/edit_note:", False),
+            ("frontend/pages/database.py", tr(cfg, "Gespeicherte Daten", "Stored data"), ":material/database:", False),
+            ("frontend/pages/data_quality.py", tr(cfg, "Datenprüfung und Berechnung", "Data checks and calculations"), ":material/fact_check:", False),
         ],
     ),
 ]
@@ -71,7 +72,7 @@ try:
         active_user = render_user_settings(session)
         render_report_period(active_user)
 except Exception as exc:
-    st.sidebar.error(tr(f"Die PostgreSQL-Datenbank ist nicht erreichbar: {exc}", f"The PostgreSQL database is unavailable: {exc}"))
+    st.sidebar.error(tr(cfg, f"Die PostgreSQL-Datenbank ist nicht erreichbar: {exc}", f"The PostgreSQL database is unavailable: {exc}"))
     st.stop()
 
 with st.sidebar:

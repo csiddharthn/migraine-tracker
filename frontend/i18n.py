@@ -5,351 +5,35 @@ from datetime import date, datetime
 from decimal import Decimal
 from typing import Any
 
+from frontend.config.name_space import cfg
+
 import streamlit as st
 
 
-DEFAULT_LANGUAGE = "de"
-LANGUAGE_LABELS = {"de": "Deutsch", "en": "English"}
-
-AURA_LABELS = {
-    "F": ("Flimmersehen", "Flickering vision"),
-    "G": ("Gefühlsstörung (Kribbeln, Pelzigkeit)", "Sensory disturbance (tingling, numbness)"),
-    "S": ("Sprachstörung", "Speech disturbance"),
-    "O": ("Anderes Symptom", "Other symptom"),
-    "*": ("Noch ein anderes Symptom", "Another symptom"),
-}
-
-OTHER_SYMPTOM_LABELS = {
-    "T": ("Augentränen", "Watery eyes"),
-    "R": ("Augenrötung", "Eye redness"),
-    "N": ("Nasenlaufen / -verstopfung", "Runny / blocked nose"),
-}
-
-DERIVED_LATERALITY_LABELS = {
-    "unbekannt": ("Unbekannt", "Unknown"),
-    "rechts": ("Rechts", "Right"),
-    "links": ("Links", "Left"),
-    "beidseitig": ("Beidseitig", "Bilateral"),
-    "beidseitig": ("Beidseitig", "Bilateral"),
-    "beidseitig_linksbetont": ("Beidseitig, linksbetont", "Bilateral, left-dominant"),
-    "einseitig_unbekannt": ("Einseitig, Seite offen", "Unilateral, side unclear"),
-}
-
-CODE_LABELS = {
-    "daily_only": ("Beobachtungstag ohne Kopfschmerz", "Observation day without headache"),
-    "imported": ("Importiert", "Imported"),
-    "updated": ("Aktualisiert", "Updated"),
-    "skipped": ("Übersprungen", "Skipped"),
-    "duplicate": ("Duplikat", "Duplicate"),
-    "rejected": ("Abgelehnt", "Rejected"),
-    "created": ("Erstellt", "Created"),
-    "excel_migration": ("Historischer Bestand", "Historical legacy record"),
-    "ai_assisted": ("KI-gestützter Eintrag", "AI-assisted entry"),
-    "unbekannt": ("Unbekannt", "Unknown"),
-    "rechts": ("Rechts", "Right"),
-    "links": ("Links", "Left"),
-    "beidseitig_linksbetont": ("Beidseitig, linksbetont", "Bilateral, left-dominant"),
-    "einseitig_unbekannt": ("Einseitig, Seite offen", "Unilateral, side unclear"),
-}
-
-
-TRIGGER_LABELS_EN = {
-    "1": "Excitement / stress",
-    "2": "Recovery phase",
-    "3": "Change in sleep-wake rhythm",
-    "4": "Menstruation",
-    "5": "Cold sleeping environment / open window",
-    "6": "Heat / high outdoor temperature",
-    "7": "Late and insufficient sleep",
-    "8": "Uncertain",
-    "ND": "Not documented (legacy)",
-}
-
-TRIGGER_DESCRIPTIONS_EN = {
-    "1": "DMKG trigger",
-    "2": "DMKG trigger",
-    "3": "DMKG trigger",
-    "4": "DMKG trigger",
-    "5": "Personal: approx. 17–18 °C",
-    "6": "Personal: above 38 °C during the day",
-    "7": "Personal trigger",
-    "8": "Trigger cannot be assigned with certainty",
-    "ND": "Only for legacy entries without a documented trigger.",
-}
-
-VALUE_TRANSLATIONS = {
-    "Nicht dokumentiert": "Not documented",
-    "Nicht dokumentiert (Altbestand)": "Not documented (legacy)",
-    "Nicht ausgewählt": "Not selected",
-    "Ja": "Yes",
-    "Nein": "No",
-    "Teilweise": "Partly",
-    "Aktiv": "Active",
-    "Inaktiv": "Inactive",
-    "Dumpf / drückend": "Dull / pressing",
-    "Pulsierend / stechend": "Throbbing / stabbing",
-    "Einseitig": "Unilateral",
-    "Beidseitig": "Bilateral",
-    "Rechts": "Right",
-    "Links": "Left",
-    "Beidseitig, linksbetont": "Bilateral, left-dominant",
-    "Einseitig, Seite offen": "Unilateral, side unclear",
-    "beidseitig, links stärker": "bilateral, stronger on the left",
-    "beidseitig": "bilateral",
-    "rechtsseitig": "right-sided",
-    "linksseitig": "left-sided",
-    "rechts (aus Notiz abgeleitet)": "right (derived from note)",
-    "links (aus Notiz abgeleitet)": "left (derived from note)",
-    "einseitig, Seite nicht dokumentiert": "unilateral, side not documented",
-    "Hinterkopf, später über beiden Augen": "back of the head, later above both eyes",
-    "ausschließlich rechts": "right side only",
-    "ausschließlich links": "left side only",
-    "beidseitig, links etwas stärker": "bilateral, slightly stronger on the left",
-    "links, im Bereich des linken Auges": "left, around the left eye",
-    "links, über dem linken Auge": "left, above the left eye",
-    "rechts, im Bereich des rechten Auges": "right, around the right eye",
-    "Kälte / Zugluft": "Cold / draught",
-    "Offenes Fenster": "Open window",
-    "Später Schlaf / Schlafmangel": "Late sleep / sleep deprivation",
-    "Unterbrochener Schlaf / Baby": "Interrupted sleep / baby",
-    "Hitze / hohe Temperatur": "Heat / high temperature",
-    "Möglicherweise zu wenig getrunken": "Possibly insufficient hydration",
-    "Unterbrochener Schlaf / Unruhe": "Interrupted sleep / disturbance",
-    "Übelkeit": "Nausea",
-    "Erbrechen": "Vomiting",
-    "Lärmscheu": "Sensitivity to sound",
-    "Lichtscheu": "Sensitivity to light",
-    "Geruchsempfindlichkeit": "Sensitivity to smell",
-    "Schlaf": "Sleep",
-    "Akutmedikation": "Acute medication",
-    "Wärme": "Heat treatment",
-    "Bad": "Bath",
-    "Tigerbalsam": "Tiger balm",
-    "niedrig": "low",
-    "mittel": "medium",
-    "hoch": "high",
-    "regelbasiert": "rule-based",
-    "semantisch geprüft": "semantically reviewed",
-    "vollständig": "complete",
-    "nahezu vollständig": "nearly complete",
-    "letzte Dokumentation": "last documented time",
-    "mindestens bis": "at least until",
-    "vollständig oder nahezu vollständig": "complete or nearly complete",
-    "dokumentiert": "documented",
-    "Montag": "Monday",
-    "Dienstag": "Tuesday",
-    "Mittwoch": "Wednesday",
-    "Donnerstag": "Thursday",
-    "Freitag": "Friday",
-    "Samstag": "Saturday",
-    "Sonntag": "Sunday",
-    "Nacht (00–05:59)": "Night (00:00–05:59)",
-    "Morgen (06–11:59)": "Morning (06:00–11:59)",
-    "Nachmittag (12–17:59)": "Afternoon (12:00–17:59)",
-    "Abend (18–23:59)": "Evening (18:00–23:59)",
-    "Vor Amitriptylin": "Before amitriptyline",
-    "Amitriptylin dokumentiert": "Amitriptyline documented",
-    "Nach Amitriptylin, vor Aimovig": "After amitriptyline, before Aimovig",
-    "Seit erster Aimovig-Injektion": "Since first Aimovig injection",
-    "Weitere Beobachtung": "Further observation",
-    "Beobachtungsphase": "Observation period",
-    "Keine kausale Wirksamkeitsaussage": "No causal efficacy conclusion",
-    "Kurze Übergangsphase": "Short transition period",
-    "Für eine Wirksamkeitsbewertung noch zu kurz": "Still too short for an efficacy assessment",
-    "Beobachtungstag ohne Kopfschmerz": "Observation day without headache",
-    "Kopfschmerzeintrag importiert": "Headache entry imported",
-    "Beim erneuten Import aktualisiert": "Updated during repeated import",
-    "Unverändert übersprungen": "Skipped unchanged",
-    "Duplikat": "Duplicate",
-    "Abgelehnt": "Rejected",
-    "Aufregung / Stress": "Excitement / stress",
-    "Erholungsphase": "Recovery phase",
-    "Änderung im Schlaf-Wach-Rhythmus": "Change in sleep-wake rhythm",
-    "Menstruation": "Menstruation",
-    "Kalte Schlafumgebung / Fenster offen": "Cold sleeping environment / open window",
-    "Hitze / hohe Außentemperatur": "Heat / high outdoor temperature",
-    "Spät und zu wenig Schlaf": "Late and insufficient sleep",
-    "Unsicher": "Uncertain",
-    "DMKG-Auslöser": "DMKG trigger",
-    "Persönlicher Auslöser": "Personal trigger",
-    "Persönlich: ca. 17–18 °C": "Personal: approx. 17–18 °C",
-    "Persönlich: >38 °C tagsüber": "Personal: above 38 °C during the day",
-    "Auslöser nicht sicher zuordenbar": "Trigger cannot be assigned with certainty",
-    "Nur für ältere Einträge ohne dokumentierten Auslöser.": "Only for legacy entries without a documented trigger.",
-    "Kopfschmerzeinträge": "Headache entries",
-    "Medikamenteneinnahmen": "Medication intakes",
-    "Beobachtungstage": "Observation days",
-    "Notizinterpretationen": "Note interpretations",
-    "Auslöserzuordnungen": "Trigger assignments",
-    "Änderungsprotokoll": "Change log",
-    "Personen": "People",
-    "Auslöserkatalog": "Trigger catalogue",
-    "Automatisch ausgewertete Notizen": "Automatically analysed notes",
-    "Ausgewählte Auslöser": "Selected triggers",
-    "Verfügbare Auslöser": "Available triggers",
-    "Dokumentierte Kopfschmerz- und Migränetage.": "Documented headache and migraine days.",
-    "Alle einzelnen Medikamenteneinnahmen mit Uhrzeit, Dosis und dokumentierter Wirkung.": "All individual medication intakes with time, dose, and documented effect.",
-    "Kalendertage und vorbeugende Behandlungen.": "Calendar days and preventive treatments.",
-    "Aus den Originalnotizen abgeleitete und geprüfte Angaben.": "Information derived from and reviewed against the original notes.",
-    "Den einzelnen Einträgen zugeordnete Auslöser.": "Triggers assigned to individual entries.",
-    "Erstellungen und Änderungen an Kopfschmerzeinträgen.": "Creation and changes of headache entries.",
-    "In der Datenbank angelegte Personenprofile.": "People profiles stored in the database.",
-    "Globaler Katalog der verfügbaren Auslöser.": "Global catalogue of available triggers.",
-    "Uhrzeiten, Schmerzseite und Begleitumstände, die im Notiztext erkannt und gegebenenfalls geprüft wurden.": "Times, side of pain, and circumstances recognised in the note text and reviewed where applicable.",
-    "Die möglichen Auslöser, die bei den einzelnen Kopfschmerztagen ausgewählt wurden.": "The possible triggers selected for each headache day.",
-    "Alle Auslöser, die im Eingabeformular ausgewählt werden können.": "All triggers that can be selected in the entry form.",
-}
-
-COLUMN_TRANSLATIONS = {
-    "Datum": "Date",
-    "Datum des Eintrags": "Entry date",
-    "Stärke": "Intensity",
-    "Dauer (h)": "Duration (h)",
-    "Dauer (Std.)": "Duration (hours)",
-    "Dauer (Stunden)": "Duration (hours)",
-    "Auslöser": "Triggers",
-    "Schmerzart": "Pain type",
-    "Seite": "Side",
-    "Seite (eingetragen)": "Side (entered)",
-    "Seite (abgeleitet)": "Side (derived)",
-    "Vorboten": "Aura",
-    "Erbrechen": "Vomiting",
-    "Übelkeit": "Nausea",
-    "Lärmscheu": "Sensitivity to sound",
-    "Lichtscheu": "Sensitivity to light",
-    "Geruchsempfindlich": "Sensitivity to smell",
-    "Andere Symptome": "Other symptoms",
-    "Medikament": "Medication",
-    "Medikamente": "Medications",
-    "Medikation": "Medication",
-    "Einnahmezeit": "Time taken",
-    "Einnahme-ID": "Intake ID",
-    "Dosis / Form": "Dose / form",
-    "Wirkung": "Effect",
-    "Notizen": "Notes",
-    "Quelle": "Source",
-    "Ursprünglicher KI-Eingabetext": "Original AI input text",
-    "KI-Anbieter": "AI provider",
-    "KI-Modell": "AI model",
-    "KI-Promptversion": "AI prompt version",
-    "KI-Entwurf geprüft am": "AI draft reviewed at",
-    "Quellzeile": "Source row",
-    "Quellfingerabdruck": "Source fingerprint",
-    "Erstellt": "Created",
-    "Geändert": "Updated",
-    "Beginn": "Onset",
-    "Höhepunkt": "Peak",
-    "Höhepunkt Beginn": "Peak start",
-    "Höhepunkt Ende": "Peak end",
-    "Ende": "End",
-    "Endstatus": "End status",
-    "Seitendetail": "Side detail",
-    "Kontexte": "Contexts",
-    "Automatisch erkannte Schmerzseite": "Automatically recognised side of pain",
-    "Genauere Angabe zur Schmerzseite": "More detail about the side of pain",
-    "Erkannte Begleitumstände": "Recognised circumstances",
-    "Sicherheit der automatischen Erkennung": "Confidence of automatic recognition",
-    "Art der automatischen Erkennung": "Type of automatic recognition",
-    "Symptome": "Symptoms",
-    "Maßnahmen": "Interventions",
-    "Konfidenz": "Confidence",
-    "Methode": "Method",
-    "Manuell geprüft": "Manually reviewed",
-    "Geprüft am": "Reviewed at",
-    "Beschreibung": "Description",
-    "Aktion": "Action",
-    "Zeitpunkt": "Timestamp",
-    "Ursprung": "Origin",
-    "Vorher": "Before",
-    "Nachher": "After",
-    "Quelldatei": "Source file",
-    "Tabellenblatt": "Worksheet",
-    "Status": "Status",
-    "Hinweise": "Issues",
-    "Importiert am": "Imported at",
-    "Vollständiger Quellpfad": "Full source path",
-    "Rohdaten": "Raw data",
-    "Inhaltshash": "Content hash",
-    "Name": "Name",
-    "Erfassungsbeginn": "Tracking start",
-    "Aktiv": "Active",
-    "Namensschlüssel": "Name key",
-    "Bezeichnung": "Label",
-    "Reihenfolge": "Order",
-    "Monat": "Month",
-    "Beobachtungstage": "Observation days",
-    "Kopfschmerztage": "Headache days",
-    "Je 30 Tage": "Per 30 days",
-    "Ø Stärke": "Avg. intensity",
-    "Ø Dauer": "Avg. duration",
-    "Stunden": "Hours",
-    "Kontext": "Context",
-    "Tage": "Days",
-    "Anteil": "Share",
-    "Wochentag": "Weekday",
-    "Beobachtet": "Observed",
-    "Quote": "Rate",
-    "Geholfen": "Helped",
-    "Teilweise": "Partly",
-    "Nicht geholfen": "Did not help",
-    "Ø Ausgangsstärke": "Avg. initial intensity",
-    "Phase": "Phase",
-    "Einordnung": "Context",
-    "Feld": "Field",
-    "Vollständig": "Complete",
-    "Gesamt": "Total",
-    "Zeilen": "Rows",
-    "Hinweis": "Issue",
-}
-
-MONTHS_DE = ("Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember")
-MONTHS_EN = ("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
-
-ERROR_TRANSLATIONS = {
-    "Mindestens ein Auslöser ist erforderlich.": "At least one trigger is required.",
-    "Der ausgewählte Eintrag wurde nicht gefunden.": "The selected entry was not found.",
-    "Für den Eintrag ist keine Interpretation vorhanden.": "No interpretation is available for this entry.",
-    "Bitte geben Sie einen Namen mit mindestens zwei Zeichen ein.": "Please enter a name with at least two characters.",
-    "Der Name darf höchstens 160 Zeichen lang sein.": "The name may contain no more than 160 characters.",
-    "Die ausgewählte Person wurde nicht gefunden.": "The selected person was not found.",
-    "Eine Person mit diesem Namen ist bereits vorhanden.": "A person with this name already exists.",
-    "Bitte geben Sie eine Bezeichnung mit mindestens zwei Zeichen ein.": "Please enter a label with at least two characters.",
-    "Die Bezeichnung darf höchstens 160 Zeichen lang sein.": "The label may contain no more than 160 characters.",
-    "Die Beschreibung darf höchstens 2.000 Zeichen lang sein.": "The description may contain no more than 2,000 characters.",
-    "Ein Auslöser mit dieser Bezeichnung ist bereits vorhanden.": "A trigger with this label already exists.",
-    "Der ausgewählte Datenbereich ist nicht verfügbar.": "The selected data area is not available.",
-    "Für die KI-Auswertung ist kein Groq-API-Schlüssel konfiguriert.": "No Groq API key is configured for AI analysis.",
-    "Bitte geben Sie zuerst eine Beschreibung der Kopfschmerzen ein.": "Enter a description of the headache first.",
-    "Die KI-Auswertung konnte nicht abgeschlossen werden. Prüfen Sie den API-Schlüssel und die Internetverbindung.": "AI analysis could not be completed. Check the API key and internet connection.",
-    "Die KI hat keinen auswertbaren Entwurf zurückgegeben.": "AI did not return a usable draft.",
-    "Auslöser fehlt im Altbestand; als ND (nicht dokumentiert) übernommen.": "Trigger missing in legacy data; imported as ND (not documented).",
-}
-
-
-def current_language() -> str:
+def current_language(cfg) -> str:
     try:
-        value = st.session_state.get("app_language", DEFAULT_LANGUAGE)
+        value = st.session_state.get("app_language", cfg.DEFAULT_LANGUAGE)
     except Exception:
-        return DEFAULT_LANGUAGE
-    return value if value in LANGUAGE_LABELS else DEFAULT_LANGUAGE
+        return cfg.DEFAULT_LANGUAGE
+    return value if value in cfg.LANGUAGE_LABELS else cfg.DEFAULT_LANGUAGE
 
 
-def tr(german: str, english: str, *, lang: str | None = None) -> str:
+def tr(cfg, german: str, english: str, *, lang: str | None = None) -> str:
     return english if (lang or current_language()) == "en" else german
 
 
-def localize_value(value: Any, *, lang: str | None = None) -> Any:
+def localize_value(cfg, value: Any, *, lang: str | None = None) -> Any:
     resolved_language = lang or current_language()
     if not isinstance(value, str):
         return value
     if " · " in value:
         return " · ".join(str(localize_value(part, lang=lang)) for part in value.split(" · "))
-    if value in AURA_LABELS:
+    if value in cfg.AURA_LABELS:
         return aura_label(value, lang=resolved_language)
-    if value in OTHER_SYMPTOM_LABELS:
+    if value in cfg.OTHER_SYMPTOM_LABELS:
         return other_symptom_label(value, lang=resolved_language)
-    if value in CODE_LABELS:
-        german, english = CODE_LABELS[value]
+    if value in cfg.CODE_LABELS:
+        german, english = cfg.CODE_LABELS[value]
         return tr(german, english, lang=resolved_language)
     next_day = re.match(r"^(\d{2}:\d{2}) \(nächster Tag\)$", value)
     if next_day:
@@ -359,8 +43,8 @@ def localize_value(value: Any, *, lang: str | None = None) -> Any:
         return tr(value, f"{later_day.group(1)} ({later_day.group(2)} days later)", lang=resolved_language)
     if resolved_language != "en":
         return value
-    if value in VALUE_TRANSLATIONS:
-        return VALUE_TRANSLATIONS[value]
+    if value in cfg.VALUE_TRANSLATIONS:
+        return cfg.VALUE_TRANSLATIONS[value]
     if value.startswith("Vorboten: "):
         code = value.removeprefix("Vorboten: ")
         return f"Aura: {aura_label(code, lang=lang)}"
@@ -368,115 +52,115 @@ def localize_value(value: Any, *, lang: str | None = None) -> Any:
         code = value.removeprefix("Andere Symptome: ")
         return f"Other symptoms: {other_symptom_label(code, lang=lang)}"
     trigger_match = re.match(r"^([A-Z0-9*]+)\s+–\s+(.+)$", value)
-    if trigger_match and trigger_match.group(1) in TRIGGER_LABELS_EN:
-        return f"{trigger_match.group(1)} – {TRIGGER_LABELS_EN[trigger_match.group(1)]}"
-    for index, month in enumerate(MONTHS_DE):
+    if trigger_match and trigger_match.group(1) in cfg.TRIGGER_LABELS_EN:
+        return f"{trigger_match.group(1)} – {cfg.TRIGGER_LABELS_EN[trigger_match.group(1)]}"
+    for index, month in enumerate(cfg.MONTHS_DE):
         if value.startswith(f"{month} "):
-            return value.replace(month, MONTHS_EN[index], 1)
+            return value.replace(month, cfg.MONTHS_EN[index], 1)
     return value
 
 
-def canonical_value(value: str, *, lang: str | None = None) -> str:
+def canonical_value(cfg, value: str, *, lang: str | None = None) -> str:
     if (lang or current_language()) != "en":
         return value
     if value.startswith("Aura: "):
         label = value.removeprefix("Aura: ")
-        code = next((code for code in AURA_LABELS if aura_label(code, lang="en") == label), label)
+        code = next((code for code in cfg.AURA_LABELS if aura_label(code, lang="en") == label), label)
         return f"Vorboten: {code}"
     if value.startswith("Other symptoms: "):
         label = value.removeprefix("Other symptoms: ")
-        code = next((code for code in OTHER_SYMPTOM_LABELS if other_symptom_label(code, lang="en") == label), label)
+        code = next((code for code in cfg.OTHER_SYMPTOM_LABELS if other_symptom_label(code, lang="en") == label), label)
         return f"Andere Symptome: {code}"
-    code_reverse = {english: code for code, (_, english) in CODE_LABELS.items()}
+    code_reverse = {english: code for code, (_, english) in cfg.CODE_LABELS.items()}
     if value in code_reverse:
         return code_reverse[value]
-    reverse = {english: german for german, english in VALUE_TRANSLATIONS.items()}
+    reverse = {english: german for german, english in cfg.VALUE_TRANSLATIONS.items()}
     return reverse.get(value, value)
 
 
-def column_label(value: str, *, lang: str | None = None) -> str:
+def column_label(cfg, value: str, *, lang: str | None = None) -> str:
     if (lang or current_language()) == "en":
-        return COLUMN_TRANSLATIONS.get(value, value)
+        return cfg.COLUMN_TRANSLATIONS.get(value, value)
     return value
 
 
-def localize_items(items: list[dict[str, Any]], *, lang: str | None = None) -> list[dict[str, Any]]:
+def localize_items(cfg, items: list[dict[str, Any]], *, lang: str | None = None) -> list[dict[str, Any]]:
     return [
         {**item, "label": localize_value(item.get("label"), lang=lang)}
         for item in items
     ]
 
 
-def yes_no(value: bool, *, lang: str | None = None) -> str:
+def yes_no(cfg, value: bool, *, lang: str | None = None) -> str:
     return tr("Ja", "Yes", lang=lang) if value else tr("Nein", "No", lang=lang)
 
 
-def aura_label(code: str, *, lang: str | None = None) -> str:
-    german, english = AURA_LABELS.get(code, (code, code))
+def aura_label(cfg, code: str, *, lang: str | None = None) -> str:
+    german, english = cfg.AURA_LABELS.get(code, (code, code))
     return tr(german, english, lang=lang)
 
 
-def other_symptom_label(code: str, *, lang: str | None = None) -> str:
-    german, english = OTHER_SYMPTOM_LABELS.get(code, (code, code))
+def other_symptom_label(cfg, code: str, *, lang: str | None = None) -> str:
+    german, english = cfg.OTHER_SYMPTOM_LABELS.get(code, (code, code))
     return tr(german, english, lang=lang)
 
 
-def derived_laterality_label(code: str, *, lang: str | None = None) -> str:
-    german, english = DERIVED_LATERALITY_LABELS.get(code, (code, code))
+def derived_laterality_label(cfg, code: str, *, lang: str | None = None) -> str:
+    german, english = cfg.DERIVED_LATERALITY_LABELS.get(code, (code, code))
     return tr(german, english, lang=lang)
 
 
-def trigger_label(code: str, stored_label: str, *, lang: str | None = None) -> str:
+def trigger_label(cfg, code: str, stored_label: str, *, lang: str | None = None) -> str:
     if (lang or current_language()) == "en":
-        return TRIGGER_LABELS_EN.get(code, stored_label)
+        return cfg.TRIGGER_LABELS_EN.get(code, stored_label)
     return stored_label
 
 
-def trigger_description(code: str, stored_description: str, *, lang: str | None = None) -> str:
+def trigger_description(cfg, code: str, stored_description: str, *, lang: str | None = None) -> str:
     if (lang or current_language()) == "en":
-        return TRIGGER_DESCRIPTIONS_EN.get(code, stored_description)
+        return cfg.TRIGGER_DESCRIPTIONS_EN.get(code, stored_description)
     return stored_description
 
 
-def trigger_text(code: str, stored_label: str, *, lang: str | None = None) -> str:
+def trigger_text(cfg, code: str, stored_label: str, *, lang: str | None = None) -> str:
     return trigger_label(code, stored_label, lang=lang)
 
 
-def month_label(month_key: str, *, lang: str | None = None) -> str:
+def month_label(cfg, month_key: str, *, lang: str | None = None) -> str:
     year, month = month_key.split("-", 1)
-    names = MONTHS_EN if (lang or current_language()) == "en" else MONTHS_DE
+    names = cfg.MONTHS_EN if (lang or current_language()) == "en" else cfg.MONTHS_DE
     return f"{names[int(month) - 1]} {year}"
 
 
-def format_date_value(value: date | None, *, lang: str | None = None) -> str:
+def format_date_value(cfg, value: date | None, *, lang: str | None = None) -> str:
     if value is None:
         return "–"
     return value.strftime("%Y-%m-%d" if (lang or current_language()) == "en" else "%d.%m.%Y")
 
 
-def format_datetime_value(value: datetime | None, *, lang: str | None = None) -> str:
+def format_datetime_value(cfg, value: datetime | None, *, lang: str | None = None) -> str:
     if value is None:
         return "–"
     return value.astimezone().strftime("%Y-%m-%d %H:%M" if (lang or current_language()) == "en" else "%d.%m.%Y %H:%M")
 
 
-def date_input_format(*, lang: str | None = None) -> str:
+def date_input_format(cfg, *, lang: str | None = None) -> str:
     return "YYYY-MM-DD" if (lang or current_language()) == "en" else "DD.MM.YYYY"
 
 
-def format_number(value: float | Decimal | None, digits: int = 1, *, lang: str | None = None) -> str:
+def format_number(cfg, value: float | Decimal | None, digits: int = 1, *, lang: str | None = None) -> str:
     if value is None:
         return "–"
     text = f"{float(value):.{digits}f}"
     return text if (lang or current_language()) == "en" else text.replace(".", ",")
 
 
-def error_message(error: Exception | str, *, lang: str | None = None) -> str:
+def error_message(cfg, error: Exception | str, *, lang: str | None = None) -> str:
     text = str(error)
     if (lang or current_language()) != "en":
         return text
-    if text in ERROR_TRANSLATIONS:
-        return ERROR_TRANSLATIONS[text]
+    if text in cfg.ERROR_TRANSLATIONS:
+        return cfg.ERROR_TRANSLATIONS[text]
     duplicate_date = re.match(r"Für den (.+) existiert bereits ein Eintrag\.", text)
     if duplicate_date:
         return f"An entry already exists for {duplicate_date.group(1)}."

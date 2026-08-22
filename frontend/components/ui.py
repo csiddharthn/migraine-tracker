@@ -7,6 +7,7 @@ import plotly.graph_objects as go
 import streamlit as st
 import streamlit.components.v1 as components
 
+from frontend.config.name_space import cfg
 from frontend.i18n import format_date_value, format_number
 
 
@@ -41,11 +42,11 @@ def page_header(title: str, description: str) -> None:
 
 
 def format_decimal(value: float | None, digits: int = 1) -> str:
-    return format_number(value, digits)
+    return format_number(cfg, value, digits)
 
 
 def format_date(value: date | None) -> str:
-    return format_date_value(value)
+    return format_date_value(cfg, value)
 
 
 def chart_config() -> dict[str, Any]:

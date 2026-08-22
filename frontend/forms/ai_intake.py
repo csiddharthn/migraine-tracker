@@ -16,6 +16,7 @@ from backend.services.entry_service import DuplicateEntryError, EntryService
 from frontend.components.state import clear_data_cache, groq_api_key
 from frontend.components.ui import format_date
 from frontend.forms.entry_form import render_entry_form
+from frontend.config.name_space import cfg
 from frontend.i18n import error_message, tr
 
 
@@ -42,46 +43,46 @@ def render_ai_intake(
     clarification_key = f"ai_intake_clarifications_{user_id}"
     transcription_metadata_key = f"ai_intake_transcription_metadata_{user_id}"
 
-    st.subheader(tr("Freien Text in einen Eintrag umwandeln", "Turn free text into an entry"))
+    st.subheader(tr(cfg, "Freien Text in einen Eintrag umwandeln", "Turn free text into an entry"))
     st.caption(
-        tr(
+        tr(cfg, 
             "Beschreiben oder diktieren Sie den Kopfschmerz in eigenen Worten. Die KI erstellt daraus nur einen Entwurf; gespeichert wird erst nach Ihrer Prüfung im Formular.",
             "Describe or dictate the headache in your own words. AI only creates a draft; nothing is saved until you review the form.",
         )
     )
     st.caption(
-        tr(
+        tr(cfg, 
             "Englische und gemischte Beschreibungen werden automatisch übersetzt; der ausgefüllte Entwurf wird immer auf Deutsch vereinheitlicht.",
             "English and mixed-language descriptions are translated automatically; the completed draft is always standardised in German.",
         )
     )
     if not ai_config.get("enabled", True):
-        st.info(tr("Die KI-Eingabe ist in der Konfiguration deaktiviert.", "AI-assisted entry is disabled in the configuration."))
+        st.info(tr(cfg, "Die KI-Eingabe ist in der Konfiguration deaktiviert.", "AI-assisted entry is disabled in the configuration."))
         return
     if not api_key:
         st.info(
-            tr(
+            tr(cfg, 
                 "Für diese Funktion fehlt noch der Groq-API-Schlüssel. Hinterlegen Sie GROQ_API_KEY lokal in der Datei .env oder in .streamlit/secrets.toml und starten Sie die Anwendung neu.",
                 "This feature still needs a Groq API key. Store GROQ_API_KEY locally in .env or .streamlit/secrets.toml and restart the application.",
             ),
             icon=":material/key:",
         )
 
-    configured_default = str(ai_config.get("default_model", model_ids[0]))
+    configured_default = str(cfg, ai_config.get("default_model", model_ids[0]))
     default_index = model_ids.index(configured_default) if configured_default in model_ids else 0
     preferred_model = st.selectbox(
-        tr("Bevorzugtes Groq-Modell", "Preferred Groq model"),
+        tr(cfg, "Bevorzugtes Groq-Modell", "Preferred Groq model"),
         options=model_ids,
         index=default_index,
         format_func=lambda model_id: _model_label(model_id, model_options, language),
         key=f"ai_intake_model_{user_id}",
-        help=tr(
+        help=tr(cfg, 
             "Dieses Modell wird zuerst verwendet. Bei einem vorübergehenden Fehler oder Nutzungslimit probiert die Anwendung automatisch die anderen hier konfigurierten Groq-Modelle.",
             "This model is tried first. If it is temporarily unavailable or rate-limited, the app automatically tries the other configured Groq models.",
         ),
     )
     st.caption(
-        tr(
+        tr(cfg, 
             "Nur Groq wird verwendet. Automatische Modellreihenfolge: ",
             "Only Groq is used. Automatic model order: ",
         )
@@ -92,7 +93,7 @@ def render_ai_intake(
     )
 
     consent = st.checkbox(
-        tr(
+        tr(cfg, 
             "Ich bin einverstanden, dass meine Aufnahme bzw. mein Gesundheitstext an die Groq-API gesendet wird.",
             "I agree that my recording or health text may be sent to the Groq API.",
         ),
@@ -100,8 +101,8 @@ def render_ai_intake(
     )
 
     if transcription_config.get("enabled", True):
-        st.markdown(f"**{tr('Spracheingabe', 'Voice input')}**")
-        transcription_default = str(
+        st.markdown(f"**{tr(cfg, 'Spracheingabe', 'Voice input')}**")
+        transcription_default = str(cfg, 
             transcription_config.get("default_model", transcription_model_ids[0])
         )
         transcription_default_index = (
@@ -110,39 +111,39 @@ def render_ai_intake(
             else 0
         )
         preferred_transcription_model = st.selectbox(
-            tr("Bevorzugtes Modell für die Spracherkennung", "Preferred speech recognition model"),
+            tr(cfg, "Bevorzugtes Modell für die Spracherkennung", "Preferred speech recognition model"),
             options=transcription_model_ids,
             index=transcription_default_index,
             format_func=lambda model_id: _model_label(model_id, transcription_options, language),
             key=f"ai_intake_transcription_model_{user_id}",
-            help=tr(
+            help=tr(cfg, 
                 "Whisper Large v3 wird wegen seiner höheren Genauigkeit empfohlen. Falls es nicht verfügbar ist, wird automatisch das nächste Modell verwendet.",
                 "Whisper Large v3 is recommended for its higher accuracy. If it is unavailable, the next model is tried automatically.",
             ),
         )
         spoken_language = st.selectbox(
-            tr("Sprache der Aufnahme", "Recording language"),
+            tr(cfg, "Sprache der Aufnahme", "Recording language"),
             options=["auto", "de", "en"],
             format_func=lambda value: {
-                "auto": tr("Automatisch erkennen", "Detect automatically"),
-                "de": tr("Deutsch", "German"),
-                "en": tr("Englisch", "English"),
+                "auto": tr(cfg, "Automatisch erkennen", "Detect automatically"),
+                "de": tr(cfg, "Deutsch", "German"),
+                "en": tr(cfg, "Englisch", "English"),
             }[value],
             key=f"ai_intake_recording_language_{user_id}",
         )
         recording = st.audio_input(
-            tr("Kopfschmerzbeschreibung aufnehmen", "Record headache description"),
+            tr(cfg, "Kopfschmerzbeschreibung aufnehmen", "Record headache description"),
             key=f"ai_intake_recording_{user_id}",
             disabled=not api_key,
         )
         transcribe = st.button(
-            tr("Aufnahme in Text umwandeln", "Convert recording to text"),
+            tr(cfg, "Aufnahme in Text umwandeln", "Convert recording to text"),
             icon=":material/transcribe:",
             disabled=not api_key or recording is None,
         )
         if recording is not None and not consent:
             st.warning(
-                tr(
+                tr(cfg, 
                     "Die Aufnahme ist bereit. Aktivieren Sie oben noch die Zustimmung zur Verarbeitung durch Groq; anschließend kann die Aufnahme in Text umgewandelt werden.",
                     "The recording is ready. Enable the Groq processing consent above; the recording can then be converted to text.",
                 ),
@@ -156,10 +157,10 @@ def render_ai_intake(
                         transcription_config=transcription_config,
                         preferred_model=preferred_transcription_model,
                         audio=recording.getvalue(),
-                        filename=getattr(recording, "name", "migraine-description.wav"),
+                        filename=getattr(cfg, recording, "name", "migraine-description.wav"),
                         language=None if spoken_language == "auto" else spoken_language,
                     )
-                    existing_narrative = str(st.session_state.get(narrative_key, "")).strip()
+                    existing_narrative = str(cfg, st.session_state.get(narrative_key, "")).strip()
                     st.session_state[narrative_key] = (
                         f"{existing_narrative}\n\n{transcript}".strip() if existing_narrative else transcript
                     )
@@ -171,14 +172,14 @@ def render_ai_intake(
                     }
                     st.rerun()
                 except AITranscriptionError as exc:
-                    st.error(error_message(exc))
+                    st.error(error_message(cfg, exc))
 
         transcription_metadata = st.session_state.get(transcription_metadata_key, {})
         if transcription_metadata:
-            voice_model_used = str(transcription_metadata.get("model", preferred_transcription_model))
+            voice_model_used = str(cfg, transcription_metadata.get("model", preferred_transcription_model))
             if voice_model_used != preferred_transcription_model:
                 st.info(
-                    tr(
+                    tr(cfg, 
                         "Das bevorzugte Sprachmodell war nicht verfügbar. Die Aufnahme wurde automatisch mit "
                         f"{_model_label(voice_model_used, transcription_options, language)} transkribiert.",
                         "The preferred speech model was unavailable. The recording was automatically transcribed with "
@@ -187,21 +188,21 @@ def render_ai_intake(
                 )
             else:
                 st.caption(
-                    tr("Letzte Transkription mit: ", "Last transcription with: ")
+                    tr(cfg, "Letzte Transkription mit: ", "Last transcription with: ")
                     + _model_label(voice_model_used, transcription_options, language)
                 )
 
     narrative = st.text_area(
-        tr("Beschreibung des Kopfschmerztags", "Description of the headache day"),
+        tr(cfg, "Beschreibung des Kopfschmerztags", "Description of the headache day"),
         key=narrative_key,
         height=250,
-        placeholder=tr(
+        placeholder=tr(cfg, 
             "Zum Beispiel: Heute begannen die Kopfschmerzen gegen 08:30 Uhr rechtsseitig ...",
             "For example: Today the headache started at about 08:30 on the right side ...",
         ),
     )
     analyze = st.button(
-        tr("Entwurf erstellen", "Create draft"),
+        tr(cfg, "Entwurf erstellen", "Create draft"),
         type="primary",
         icon=":material/auto_awesome:",
         disabled=not api_key or not narrative.strip(),
@@ -209,7 +210,7 @@ def render_ai_intake(
     if analyze:
         if not consent:
             st.warning(
-                tr(
+                tr(cfg, 
                     "Aktivieren Sie zuerst die Zustimmung zur Verarbeitung durch Groq.",
                     "Enable consent for Groq processing first.",
                 ),
@@ -234,7 +235,7 @@ def render_ai_intake(
                 st.session_state[clarification_key] = []
                 st.rerun()
             except AIIntakeError as exc:
-                st.error(error_message(exc))
+                st.error(error_message(cfg, exc))
 
     raw_draft = st.session_state.get(draft_key)
     if not raw_draft:
@@ -243,18 +244,18 @@ def render_ai_intake(
     metadata = st.session_state.get(metadata_key, {})
 
     st.divider()
-    st.subheader(tr("KI-Entwurf prüfen", "Review AI draft"))
+    st.subheader(tr(cfg, "KI-Entwurf prüfen", "Review AI draft"))
     st.caption(
-        tr(
+        tr(cfg, 
             "Alle erkannten Angaben stehen unten in den normalen Eingabefeldern. Bitte korrigieren Sie Fehler oder unklare Standardwerte vor dem Speichern.",
             "All recognised information appears in the normal fields below. Correct errors or unclear default values before saving.",
         )
     )
-    model_used = str(metadata.get("model", preferred_model))
+    model_used = str(cfg, metadata.get("model", preferred_model))
     attempted_models = list(metadata.get("attempted_models", [model_used]))
     if model_used != preferred_model:
         st.info(
-            tr(
+            tr(cfg, 
                 "Das bevorzugte Modell war nicht verfügbar. Der Entwurf wurde automatisch mit "
                 f"{_model_label(model_used, model_options, language)} erstellt.",
                 "The preferred model was unavailable. The draft was created automatically with "
@@ -263,22 +264,22 @@ def render_ai_intake(
         )
     else:
         st.caption(
-            tr("Entwurf erstellt mit: ", "Draft created with: ")
+            tr(cfg, "Entwurf erstellt mit: ", "Draft created with: ")
             + _model_label(model_used, model_options, language)
         )
     notes = draft.localized_notes(language)
     if notes:
-        with st.expander(tr("Hinweise zur Auswertung", "Interpretation notes"), expanded=False):
+        with st.expander(tr(cfg, "Hinweise zur Auswertung", "Interpretation notes"), expanded=False):
             for note in notes:
                 st.write(f"- {note}")
     if draft.proposed_triggers:
         st.warning(
-            tr("Noch nicht im Auslöser-Katalog: ", "Not yet in the trigger catalogue: ")
+            tr(cfg, "Noch nicht im Auslöser-Katalog: ", "Not yet in the trigger catalogue: ")
             + ", ".join(draft.proposed_triggers)
         )
 
     if draft.clarification_questions:
-        st.markdown(f"**{tr('Offene Fragen', 'Open questions')}**")
+        st.markdown(f"**{tr(cfg, 'Offene Fragen', 'Open questions')}**")
         answers: list[tuple[str, str]] = []
         answer_key = draft.fingerprint()
         for index, question in enumerate(draft.clarification_questions):
@@ -289,7 +290,7 @@ def render_ai_intake(
             )
             answers.append((label, answer))
         apply_answers = st.button(
-            tr("Antworten in den Entwurf übernehmen", "Apply answers to draft"),
+            tr(cfg, "Antworten in den Entwurf übernehmen", "Apply answers to draft"),
             icon=":material/refresh:",
             disabled=not any(answer.strip() for _, answer in answers),
         )
@@ -315,16 +316,16 @@ def render_ai_intake(
                 st.session_state[clarification_key] = combined
                 st.rerun()
             except AIIntakeError as exc:
-                st.error(error_message(exc))
+                st.error(error_message(cfg, exc))
 
     save_source = st.checkbox(
-        tr(
+        tr(cfg, 
             "Ursprünglichen Text zusammen mit dem Eintrag speichern",
             "Store the original text with the entry",
         ),
         value=True,
         key=f"ai_store_source_{user_id}_{draft.fingerprint()}",
-        help=tr(
+        help=tr(cfg, 
             "Der Text bleibt getrennt von den strukturierten Notizen erhalten und dient der späteren Nachvollziehbarkeit.",
             "The text is retained separately from the structured notes for later traceability.",
         ),
@@ -349,7 +350,7 @@ def render_ai_intake(
             "source_narrative": source_narrative,
             "ai_provider": "groq",
             "ai_model": model_used,
-            "ai_prompt_version": str(ai_config.get("prompt_version", "1.2")),
+            "ai_prompt_version": str(cfg, ai_config.get("prompt_version", "1.2")),
             "ai_extraction": ai_extraction,
         }
     )
@@ -362,14 +363,14 @@ def render_ai_intake(
         st.session_state.pop(clarification_key, None)
         st.session_state.pop(transcription_metadata_key, None)
         st.success(
-            tr(
+            tr(cfg, 
                 f"Der geprüfte Eintrag für den {format_date(entry.entry_date)} wurde gespeichert.",
                 f"The reviewed entry for {format_date(entry.entry_date)} was saved.",
             )
         )
     except (DuplicateEntryError, ValueError) as exc:
         session.rollback()
-        st.error(error_message(exc))
+        st.error(error_message(cfg, exc))
 
 
 def _extract_ai_draft(
@@ -386,10 +387,10 @@ def _extract_ai_draft(
     service = AIIntakeService(
         api_key=api_key,
         models=_ordered_models(preferred_model, model_ids),
-        prompt_version=str(ai_config.get("prompt_version", "1.2")),
+        prompt_version=str(cfg, ai_config.get("prompt_version", "1.2")),
         timeout_seconds=int(ai_config.get("timeout_seconds", 90)),
     )
-    with st.spinner(tr("Der Text wird strukturiert ...", "Structuring the text ...")):
+    with st.spinner(tr(cfg, "Der Text wird strukturiert ...", "Structuring the text ...")):
         draft = service.extract(
             narrative,
             trigger_definitions=trigger_definitions,
@@ -405,13 +406,13 @@ def _configured_models(ai_config: dict) -> list[dict[str, str]]:
     for item in ai_config.get("models", []):
         if isinstance(item, str) and item.strip():
             configured.append({"id": item.strip(), "label_de": item.strip(), "label_en": item.strip()})
-        elif isinstance(item, dict) and str(item.get("id", "")).strip():
-            model_id = str(item["id"]).strip()
+        elif isinstance(item, dict) and str(cfg, item.get("id", "")).strip():
+            model_id = str(cfg, item["id"]).strip()
             configured.append(
                 {
                     "id": model_id,
-                    "label_de": str(item.get("label_de", model_id)),
-                    "label_en": str(item.get("label_en", model_id)),
+                    "label_de": str(cfg, item.get("label_de", model_id)),
+                    "label_en": str(cfg, item.get("label_en", model_id)),
                 }
             )
     if configured:
@@ -453,13 +454,13 @@ def _configured_model_list(config: dict) -> list[dict[str, str]]:
     for item in config.get("models", []):
         if isinstance(item, str) and item.strip():
             configured.append({"id": item.strip(), "label_de": item.strip(), "label_en": item.strip()})
-        elif isinstance(item, dict) and str(item.get("id", "")).strip():
-            model_id = str(item["id"]).strip()
+        elif isinstance(item, dict) and str(cfg, item.get("id", "")).strip():
+            model_id = str(cfg, item["id"]).strip()
             configured.append(
                 {
                     "id": model_id,
-                    "label_de": str(item.get("label_de", model_id)),
-                    "label_en": str(item.get("label_en", model_id)),
+                    "label_de": str(cfg, item.get("label_de", model_id)),
+                    "label_en": str(cfg, item.get("label_en", model_id)),
                 }
             )
     return configured
@@ -490,7 +491,7 @@ def _transcribe_audio(
         timeout_seconds=int(transcription_config.get("timeout_seconds", 90)),
         max_file_size_mb=int(transcription_config.get("max_file_size_mb", 25)),
     )
-    with st.spinner(tr("Die Aufnahme wird transkribiert ...", "Transcribing the recording ...")):
+    with st.spinner(tr(cfg, "Die Aufnahme wird transkribiert ...", "Transcribing the recording ...")):
         transcript = service.transcribe(audio, filename=filename, language=language)
     return transcript, service.model_used or preferred_model, service.attempted_models
 

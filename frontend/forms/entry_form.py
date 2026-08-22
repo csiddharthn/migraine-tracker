@@ -11,6 +11,7 @@ from backend.ai_intake import AIIntakeDraft
 from backend.models import DailyRecord, MigraineEntry, TriggerDefinition
 from backend.note_interpretation import StructuredNotes, TimelineNoteRow, format_structured_notes, parse_structured_notes
 from backend.services.schemas import EntryInput, MedicationInput
+from frontend.config.name_space import cfg
 from frontend.i18n import (
     aura_label,
     canonical_value,
@@ -93,62 +94,62 @@ def render_entry_form(
     medication_row_count = max(1, int(st.session_state[medication_count_key]))
 
     with st.form(f"entry_form_{key}", clear_on_submit=False):
-        st.subheader(tr("Pflichtangaben", "Required information"))
+        st.subheader(tr(cfg, "Pflichtangaben", "Required information"))
         date_col, strength_col, duration_col = st.columns([1.2, 1, 1])
         entry_date = date_col.date_input(
-            tr("Datum", "Date"),
+            tr(cfg, "Datum", "Date"),
             value=existing.entry_date if existing else draft.entry_date if draft and draft.entry_date else date.today(),
             max_value=date.today(),
-            format=date_input_format(),
+            format=date_input_format(cfg, ),
         )
         strength = strength_col.slider(
-            tr("Stärke", "Intensity"),
+            tr(cfg, "Stärke", "Intensity"),
             0,
             10,
             existing.strength if existing else draft.strength if draft and draft.strength is not None else 5,
         )
         duration = duration_col.number_input(
-            tr("Dauer (Stunden)", "Duration (hours)"),
+            tr(cfg, "Dauer (Stunden)", "Duration (hours)"),
             min_value=0.0,
             max_value=168.0,
             value=float(existing.duration_hours) if existing else float(draft.duration_hours) if draft and draft.duration_hours is not None else 1.0,
             step=0.5,
         )
         selected_trigger_codes = st.multiselect(
-            tr("Auslöser", "Triggers"),
+            tr(cfg, "Auslöser", "Triggers"),
             list(triggers_by_code),
             default=default_triggers,
-            format_func=lambda code: trigger_text(code, triggers_by_code[code].label),
-            placeholder=tr("Mindestens einen Auslöser auswählen", "Select at least one trigger"),
+            format_func=lambda code: trigger_text(cfg, code, triggers_by_code[code].label),
+            placeholder=tr(cfg, "Mindestens einen Auslöser auswählen", "Select at least one trigger"),
         )
 
-        st.subheader(tr("Schmerzbild", "Pain profile"))
+        st.subheader(tr(cfg, "Schmerzbild", "Pain profile"))
         pain_col, side_col = st.columns(2)
         pain_options: list[str | None] = [None, *PAIN_TYPES]
         pain_type = pain_col.selectbox(
-            tr("Schmerzart", "Pain type"),
+            tr(cfg, "Schmerzart", "Pain type"),
             pain_options,
             index=_choice_index(pain_options, existing.pain_type if existing else draft.pain_type if draft else None),
-            format_func=lambda value: tr("Nicht ausgewählt", "Not selected") if value is None else localize_value(value),
+            format_func=lambda value: tr(cfg, "Nicht ausgewählt", "Not selected") if value is None else localize_value(cfg, value),
         )
         laterality_options: list[str | None] = [None, *LATERALITIES]
         laterality = side_col.selectbox(
-            tr("Schmerzseite", "Side of pain"),
+            tr(cfg, "Schmerzseite", "Side of pain"),
             laterality_options,
             index=_choice_index(laterality_options, existing.entered_laterality if existing else draft.entered_laterality if draft else None),
-            format_func=lambda value: tr("Nicht ausgewählt", "Not selected") if value is None else localize_value(value),
+            format_func=lambda value: tr(cfg, "Nicht ausgewählt", "Not selected") if value is None else localize_value(cfg, value),
         )
 
-        st.subheader(tr("Begleitsymptome", "Associated symptoms"))
+        st.subheader(tr(cfg, "Begleitsymptome", "Associated symptoms"))
         selected_symptoms = st.multiselect(
-            tr("Symptome", "Symptoms"),
+            tr(cfg, "Symptome", "Symptoms"),
             SYMPTOM_OPTIONS,
             default=symptom_defaults,
             format_func=_symptom_option_label,
-            placeholder=tr("Begleitsymptome auswählen", "Select associated symptoms"),
+            placeholder=tr(cfg, "Begleitsymptome auswählen", "Select associated symptoms"),
         )
 
-        st.subheader(tr("Medikation und Behandlung", "Medication and treatment"))
+        st.subheader(tr(cfg, "Medikation und Behandlung", "Medication and treatment"))
         known_names = list(dict.fromkeys([*DEFAULT_MEDICATIONS, *medication_options]))
         effect_options: list[str | None] = [None, "Ja", "Teilweise", "Nein"]
         medication_values: list[dict[str, Any]] = []
@@ -160,32 +161,32 @@ def render_entry_form(
                 row_names.insert(1, current_name)
             med_col, time_col, dose_col, effect_col = st.columns([1.5, 0.8, 0.8, 1.2])
             medication_name = med_col.selectbox(
-                tr(f"Medikament {row_index + 1}", f"Medication {row_index + 1}"),
+                tr(cfg, f"Medikament {row_index + 1}", f"Medication {row_index + 1}"),
                 row_names,
                 index=row_names.index(current_name),
-                format_func=lambda value: tr("Keine Auswahl", "No selection") if value is None else value,
-                placeholder=tr("Auswählen oder neu eingeben", "Select or enter a new medication"),
+                format_func=lambda value: tr(cfg, "Keine Auswahl", "No selection") if value is None else value,
+                placeholder=tr(cfg, "Auswählen oder neu eingeben", "Select or enter a new medication"),
                 accept_new_options=True,
                 filter_mode="fuzzy",
                 key=f"medication_name_{key}_{row_index}",
             )
             medication_taken_at = time_col.time_input(
-                tr(f"Einnahmezeit {row_index + 1}", f"Time taken {row_index + 1}"),
+                tr(cfg, f"Einnahmezeit {row_index + 1}", f"Time taken {row_index + 1}"),
                 value=default_item.taken_at if default_item else None,
                 step=timedelta(minutes=5),
                 format="24h",
                 key=f"medication_time_{key}_{row_index}",
             )
             medication_dose = dose_col.text_input(
-                tr(f"Dosis / Form {row_index + 1}", f"Dose / form {row_index + 1}"),
+                tr(cfg, f"Dosis / Form {row_index + 1}", f"Dose / form {row_index + 1}"),
                 value=default_item.dose or "" if default_item else "",
                 key=f"medication_dose_{key}_{row_index}",
             )
             effectiveness = effect_col.selectbox(
-                tr(f"Hat geholfen? {row_index + 1}", f"Did it help? {row_index + 1}"),
+                tr(cfg, f"Hat geholfen? {row_index + 1}", f"Did it help? {row_index + 1}"),
                 effect_options,
                 index=_choice_index(effect_options, default_item.effectiveness if default_item else None),
-                format_func=lambda value: tr("Nicht dokumentiert", "Not documented") if value is None else localize_value(value),
+                format_func=lambda value: tr(cfg, "Nicht dokumentiert", "Not documented") if value is None else localize_value(cfg, value),
                 key=f"medication_effect_{key}_{row_index}",
             )
             medication_values.append(
@@ -198,19 +199,19 @@ def render_entry_form(
             )
         medication_actions = st.columns([1, 1, 3])
         add_medication_row = medication_actions[0].form_submit_button(
-            tr("Medikament hinzufügen", "Add medication"),
+            tr(cfg, "Medikament hinzufügen", "Add medication"),
             icon=":material/add:",
             width="stretch",
         )
         remove_medication_row = medication_actions[1].form_submit_button(
-            tr("Letztes entfernen", "Remove last"),
+            tr(cfg, "Letztes entfernen", "Remove last"),
             icon=":material/remove:",
             disabled=medication_row_count <= 1,
             width="stretch",
         )
         preventive_cols = st.columns([1, 1, 2])
         aimovig = preventive_cols[0].checkbox(
-            tr("Aimovig-Injektion", "Aimovig injection"),
+            tr(cfg, "Aimovig-Injektion", "Aimovig injection"),
             value=bool((daily_record and daily_record.aimovig_injection) or (draft and draft.aimovig_injection)),
         )
         momeallerg = preventive_cols[1].checkbox(
@@ -218,18 +219,18 @@ def render_entry_form(
             value=bool((daily_record and daily_record.momeallerg_nasal_spray) or (draft and draft.momeallerg_nasal_spray)),
         )
 
-        st.subheader(tr("Notizen", "Notes"))
-        st.markdown(f"**{tr('Zeitlicher Ablauf', 'Timeline')}**")
+        st.subheader(tr(cfg, "Notizen", "Notes"))
+        st.markdown(f"**{tr(cfg, 'Zeitlicher Ablauf', 'Timeline')}**")
         timeline_header = st.columns([1, 1, 3])
-        timeline_header[0].caption(tr("Start", "Start"))
-        timeline_header[1].caption(tr("Ende", "End"))
-        timeline_header[2].caption(tr("Notiz", "Note"))
+        timeline_header[0].caption(tr(cfg, "Start", "Start"))
+        timeline_header[1].caption(tr(cfg, "Ende", "End"))
+        timeline_header[2].caption(tr(cfg, "Notiz", "Note"))
         timeline_values: list[TimelineNoteRow] = []
         for row_index in range(timeline_row_count):
             default_row = timeline_defaults[row_index] if row_index < len(timeline_defaults) else TimelineNoteRow()
             timeline_columns = st.columns([1, 1, 3])
             start_time = timeline_columns[0].time_input(
-                tr(f"Startzeit Zeile {row_index + 1}", f"Start time row {row_index + 1}"),
+                tr(cfg, f"Startzeit Zeile {row_index + 1}", f"Start time row {row_index + 1}"),
                 value=default_row.start_time,
                 key=f"timeline_start_{key}_{row_index}",
                 label_visibility="collapsed",
@@ -237,7 +238,7 @@ def render_entry_form(
                 format="24h",
             )
             end_time = timeline_columns[1].time_input(
-                tr(f"Endzeit Zeile {row_index + 1}", f"End time row {row_index + 1}"),
+                tr(cfg, f"Endzeit Zeile {row_index + 1}", f"End time row {row_index + 1}"),
                 value=default_row.end_time,
                 key=f"timeline_end_{key}_{row_index}",
                 label_visibility="collapsed",
@@ -245,37 +246,37 @@ def render_entry_form(
                 format="24h",
             )
             row_note = timeline_columns[2].text_input(
-                tr(f"Notiz Zeile {row_index + 1}", f"Note row {row_index + 1}"),
+                tr(cfg, f"Notiz Zeile {row_index + 1}", f"Note row {row_index + 1}"),
                 value=default_row.note,
                 key=f"timeline_note_{key}_{row_index}",
                 label_visibility="collapsed",
-                placeholder=tr("Ereignis oder Beobachtung", "Event or observation"),
+                placeholder=tr(cfg, "Ereignis oder Beobachtung", "Event or observation"),
             )
             timeline_values.append(TimelineNoteRow(start_time=start_time, end_time=end_time, note=row_note.strip()))
         timeline_actions = st.columns([1, 1, 3])
         add_timeline_row = timeline_actions[0].form_submit_button(
-            tr("Zeile hinzufügen", "Add row"),
+            tr(cfg, "Zeile hinzufügen", "Add row"),
             icon=":material/add:",
             width="stretch",
         )
         remove_timeline_row = timeline_actions[1].form_submit_button(
-            tr("Letzte Zeile entfernen", "Remove last row"),
+            tr(cfg, "Letzte Zeile entfernen", "Remove last row"),
             icon=":material/remove:",
             disabled=timeline_row_count <= 1,
             width="stretch",
         )
 
-        st.markdown(f"**{tr('Höhepunkt', 'Peak')}**")
+        st.markdown(f"**{tr(cfg, 'Höhepunkt', 'Peak')}**")
         peak_clock_default = _minute_clock(note_defaults.peak_start_minute)
         peak_time_col, peak_duration_col = st.columns([1, 1.3])
         peak_clock = peak_time_col.time_input(
-            tr("Höhepunkt erreicht um", "Peak reached at"),
+            tr(cfg, "Höhepunkt erreicht um", "Peak reached at"),
             value=peak_clock_default,
             step=timedelta(minutes=5),
             format="24h",
         )
         peak_duration_minutes = peak_duration_col.number_input(
-            tr("Dauer am Höhepunkt (Minuten)", "Time at peak (minutes)"),
+            tr(cfg, "Dauer am Höhepunkt (Minuten)", "Time at peak (minutes)"),
             min_value=0,
             max_value=1440,
             value=note_defaults.peak_duration_minutes,
@@ -283,16 +284,16 @@ def render_entry_form(
         )
 
         possible_factors = st.text_area(
-            tr("Mögliche Einflussfaktoren", "Possible contributing factors"),
+            tr(cfg, "Mögliche Einflussfaktoren", "Possible contributing factors"),
             value=note_defaults.possible_factors,
             height=120,
         )
         symptoms_and_actions = st.text_area(
-            tr("Beschwerden und Maßnahmen", "Symptoms and actions"),
+            tr(cfg, "Beschwerden und Maßnahmen", "Symptoms and actions"),
             value=note_defaults.symptoms_and_actions,
             height=150,
         )
-        submitted = st.form_submit_button(tr("Eintrag speichern", "Save entry"), type="primary", width="stretch")
+        submitted = st.form_submit_button(tr(cfg, "Eintrag speichern", "Save entry"), type="primary", width="stretch")
 
     if not submitted:
         if add_medication_row:
@@ -333,7 +334,7 @@ def render_entry_form(
         st.error(timeline_error)
         return None
     if peak_clock is None and peak_duration_minutes > 0:
-        st.error(tr("Bitte geben Sie die Uhrzeit des Höhepunkts an oder setzen Sie dessen Dauer auf 0 Minuten.", "Enter the peak time or set its duration to 0 minutes."))
+        st.error(tr(cfg, "Bitte geben Sie die Uhrzeit des Höhepunkts an oder setzen Sie dessen Dauer auf 0 Minuten.", "Enter the peak time or set its duration to 0 minutes."))
         return None
     peak_start_minute = _peak_minute_for_form_value(peak_clock, note_defaults.peak_start_minute)
     structured_notes = StructuredNotes(
@@ -358,7 +359,7 @@ def render_entry_form(
             entry_date=entry_date,
             trigger_codes=selected_trigger_codes,
             strength=strength,
-            duration_hours=Decimal(str(duration)),
+            duration_hours=Decimal(str(cfg, duration)),
             pain_type=pain_type,
             entered_laterality=laterality,
             aura_codes=symptom_values["aura_codes"],
@@ -378,38 +379,38 @@ def render_entry_form(
     except ValidationError as exc:
         messages = []
         for error in exc.errors():
-            field_key = ".".join(str(part) for part in error["loc"])
+            field_key = ".".join(str(cfg, part) for part in error["loc"])
             field = {
-                "trigger_codes": tr("Auslöser", "Triggers"),
-                "strength": tr("Stärke", "Intensity"),
-                "duration_hours": tr("Dauer", "Duration"),
-                "entry_date": tr("Datum", "Date"),
+                "trigger_codes": tr(cfg, "Auslöser", "Triggers"),
+                "strength": tr(cfg, "Stärke", "Intensity"),
+                "duration_hours": tr(cfg, "Dauer", "Duration"),
+                "entry_date": tr(cfg, "Datum", "Date"),
             }.get(field_key, field_key)
             message = error["msg"]
             if field_key == "trigger_codes" and error["type"] == "too_short":
-                message = tr("Mindestens ein Auslöser ist erforderlich.", "At least one trigger is required.")
+                message = tr(cfg, "Mindestens ein Auslöser ist erforderlich.", "At least one trigger is required.")
             messages.append(f"{field}: {message}")
-        st.error(tr("Bitte korrigieren Sie die Pflichtangaben: ", "Please correct the required information: ") + " · ".join(messages))
+        st.error(tr(cfg, "Bitte korrigieren Sie die Pflichtangaben: ", "Please correct the required information: ") + " · ".join(messages))
         return None
 
 
 def render_interpretation_review(entry: MigraineEntry) -> dict[str, Any] | None:
     interpretation = entry.interpretation
     if interpretation is None:
-        st.info(tr("Für diesen Eintrag wurden noch keine Angaben automatisch aus der Notiz erkannt.", "No information has yet been recognised automatically from the note for this entry."))
+        st.info(tr(cfg, "Für diesen Eintrag wurden noch keine Angaben automatisch aus der Notiz erkannt.", "No information has yet been recognised automatically from the note for this entry."))
         return None
     with st.form(f"interpretation_{entry.id}"):
-        st.caption(tr("Diese Angaben wurden automatisch im Notiztext erkannt. Sie können sie hier korrigieren. Der ursprüngliche Notiztext bleibt dabei unverändert.", "This information was recognised automatically in the note text. You can correct it here. The original note text remains unchanged."))
-        onset = _minute_control(tr("Beginn", "Onset"), interpretation.onset_minute, "onset")
-        peak_start = _minute_control(tr("Höhepunkt Beginn", "Peak start"), interpretation.peak_start_minute, "peak_start")
-        peak_end = _minute_control(tr("Höhepunkt Ende", "Peak end"), interpretation.peak_end_minute, "peak_end")
-        end = _minute_control(tr("Ende", "End"), interpretation.end_minute, "end")
-        laterality = st.selectbox(tr("Automatisch erkannte Schmerzseite", "Automatically recognised side of pain"), DERIVED_LATERALITIES, index=_choice_index(DERIVED_LATERALITIES, interpretation.laterality), format_func=derived_laterality_label)
-        side_detail = st.text_input(tr("Genauere Angabe zur Schmerzseite", "More detail about the side of pain"), value=localize_value(interpretation.side_detail or ""))
-        contexts = st.text_area(tr("Erkannte Begleitumstände (eine Angabe pro Zeile)", "Recognised circumstances (one item per line)"), value="\n".join(str(localize_value(value)) for value in interpretation.contexts), height=110)
-        symptoms = st.text_area(tr("Erkannte Symptome (eine Angabe pro Zeile)", "Recognised symptoms (one item per line)"), value="\n".join(str(localize_value(value)) for value in interpretation.symptoms), height=90)
-        interventions = st.text_area(tr("Erkannte Maßnahmen (eine Angabe pro Zeile)", "Recognised interventions (one item per line)"), value="\n".join(str(localize_value(value)) for value in interpretation.interventions), height=90)
-        submitted = st.form_submit_button(tr("Korrigierte Angaben speichern", "Save corrected information"), type="primary")
+        st.caption(tr(cfg, "Diese Angaben wurden automatisch im Notiztext erkannt. Sie können sie hier korrigieren. Der ursprüngliche Notiztext bleibt dabei unverändert.", "This information was recognised automatically in the note text. You can correct it here. The original note text remains unchanged."))
+        onset = _minute_control(tr(cfg, "Beginn", "Onset"), interpretation.onset_minute, "onset")
+        peak_start = _minute_control(tr(cfg, "Höhepunkt Beginn", "Peak start"), interpretation.peak_start_minute, "peak_start")
+        peak_end = _minute_control(tr(cfg, "Höhepunkt Ende", "Peak end"), interpretation.peak_end_minute, "peak_end")
+        end = _minute_control(tr(cfg, "Ende", "End"), interpretation.end_minute, "end")
+        laterality = st.selectbox(tr(cfg, "Automatisch erkannte Schmerzseite", "Automatically recognised side of pain"), DERIVED_LATERALITIES, index=_choice_index(DERIVED_LATERALITIES, interpretation.laterality), format_func=derived_laterality_label)
+        side_detail = st.text_input(tr(cfg, "Genauere Angabe zur Schmerzseite", "More detail about the side of pain"), value=localize_value(cfg, interpretation.side_detail or ""))
+        contexts = st.text_area(tr(cfg, "Erkannte Begleitumstände (eine Angabe pro Zeile)", "Recognised circumstances (one item per line)"), value="\n".join(str(cfg, localize_value(cfg, value)) for value in interpretation.contexts), height=110)
+        symptoms = st.text_area(tr(cfg, "Erkannte Symptome (eine Angabe pro Zeile)", "Recognised symptoms (one item per line)"), value="\n".join(str(cfg, localize_value(cfg, value)) for value in interpretation.symptoms), height=90)
+        interventions = st.text_area(tr(cfg, "Erkannte Maßnahmen (eine Angabe pro Zeile)", "Recognised interventions (one item per line)"), value="\n".join(str(cfg, localize_value(cfg, value)) for value in interpretation.interventions), height=90)
+        submitted = st.form_submit_button(tr(cfg, "Korrigierte Angaben speichern", "Save corrected information"), type="primary")
     if not submitted:
         return None
     return {
@@ -418,26 +419,26 @@ def render_interpretation_review(entry: MigraineEntry) -> dict[str, Any] | None:
         "peak_end_minute": peak_end,
         "end_minute": end,
         "laterality": laterality,
-        "side_detail": canonical_value(side_detail.strip()) or None,
-        "contexts": [canonical_value(value) for value in _lines(contexts)],
-        "symptoms": [canonical_value(value) for value in _lines(symptoms)],
-        "interventions": [canonical_value(value) for value in _lines(interventions)],
+        "side_detail": canonical_value(cfg, side_detail.strip()) or None,
+        "contexts": [canonical_value(cfg, value) for value in _lines(contexts)],
+        "symptoms": [canonical_value(cfg, value) for value in _lines(symptoms)],
+        "interventions": [canonical_value(cfg, value) for value in _lines(interventions)],
     }
 
 
 def _minute_control(label: str, value: int | None, key: str) -> int | None:
-    enabled = st.checkbox(f"{label} {tr('ist in der Notiz angegeben', 'is stated in the note')}", value=value is not None, key=f"{key}_enabled")
+    enabled = st.checkbox(f"{label} {tr(cfg, 'ist in der Notiz angegeben', 'is stated in the note')}", value=value is not None, key=f"{key}_enabled")
     columns = st.columns([2, 1])
     base = value or 0
     clock = columns[0].time_input(label, value=time((base % 1440) // 60, base % 60), disabled=not enabled, key=f"{key}_time")
     day_offset = columns[1].selectbox(
-        tr("Tag des Zeitpunkts", "Day of this time"),
+        tr(cfg, "Tag des Zeitpunkts", "Day of this time"),
         [0, 1, 2],
         index=min(2, base // 1440),
         format_func=lambda offset: {
-            0: tr("Gleicher Tag", "Same day"),
-            1: tr("Nächster Tag", "Next day"),
-            2: tr("Zwei Tage später", "Two days later"),
+            0: tr(cfg, "Gleicher Tag", "Same day"),
+            1: tr(cfg, "Nächster Tag", "Next day"),
+            2: tr(cfg, "Zwei Tage später", "Two days later"),
         }[offset],
         disabled=not enabled,
         key=f"{key}_day",
@@ -452,9 +453,9 @@ def _choice_index(options: list[Any], value: Any) -> int:
 def _timeline_validation_error(rows: list[TimelineNoteRow]) -> str | None:
     for index, row in enumerate(rows, start=1):
         if row.end_time is not None and row.start_time is None:
-            return tr(f"Zeitlicher Ablauf, Zeile {index}: Eine Endzeit benötigt eine Startzeit.", f"Timeline, row {index}: An end time requires a start time.")
+            return tr(cfg, f"Zeitlicher Ablauf, Zeile {index}: Eine Endzeit benötigt eine Startzeit.", f"Timeline, row {index}: An end time requires a start time.")
         if (row.start_time is not None or row.end_time is not None) and not row.note:
-            return tr(f"Zeitlicher Ablauf, Zeile {index}: Bitte ergänzen Sie die Notiz zum Zeitpunkt.", f"Timeline, row {index}: Add a note for this time.")
+            return tr(cfg, f"Zeitlicher Ablauf, Zeile {index}: Bitte ergänzen Sie die Notiz zum Zeitpunkt.", f"Timeline, row {index}: Add a note for this time.")
     return None
 
 
@@ -462,7 +463,7 @@ def _medication_validation_error(rows: list[dict[str, Any]]) -> str | None:
     for index, row in enumerate(rows, start=1):
         has_details = row["taken_at"] is not None or bool(row["dose"]) or row["effectiveness"] is not None
         if row["name"] is None and has_details:
-            return tr(
+            return tr(cfg, 
                 f"Medikation, Zeile {index}: Bitte wählen Sie ein Medikament aus.",
                 f"Medication, row {index}: Select a medication.",
             )
@@ -488,7 +489,7 @@ def _symptom_defaults(existing: MigraineEntry | None) -> list[str]:
     if existing is None:
         return []
     defaults = [f"aura:{code}" for code in AURA_CODES if code in existing.aura_codes]
-    defaults.extend(f"symptom:{field}" for field in CORE_SYMPTOMS if getattr(existing, field))
+    defaults.extend(f"symptom:{field}" for field in CORE_SYMPTOMS if getattr(cfg, existing, field))
     defaults.extend(f"other:{code}" for code in OTHER_SYMPTOM_CODES if code in existing.other_symptom_codes)
     return defaults
 
@@ -497,7 +498,7 @@ def _draft_symptom_defaults(draft: AIIntakeDraft | None) -> list[str]:
     if draft is None:
         return []
     defaults = [f"aura:{code}" for code in AURA_CODES if code in draft.aura_codes]
-    defaults.extend(f"symptom:{field}" for field in CORE_SYMPTOMS if getattr(draft, field) is True)
+    defaults.extend(f"symptom:{field}" for field in CORE_SYMPTOMS if getattr(cfg, draft, field) is True)
     defaults.extend(f"other:{code}" for code in OTHER_SYMPTOM_CODES if code in draft.other_symptom_codes)
     return defaults
 
@@ -505,11 +506,11 @@ def _draft_symptom_defaults(draft: AIIntakeDraft | None) -> list[str]:
 def _symptom_option_label(option: str) -> str:
     category, value = option.split(":", 1)
     if category == "aura":
-        return f"{tr('Vorboten / Aura', 'Aura')}: {aura_label(value)}"
+        return f"{tr(cfg, 'Vorboten / Aura', 'Aura')}: {aura_label(cfg, value)}"
     if category == "symptom":
         german, english = CORE_SYMPTOMS[value]
-        return tr(german, english)
-    return f"{tr('Andere Symptome', 'Other symptoms')}: {other_symptom_label(value)}"
+        return tr(cfg, german, english)
+    return f"{tr(cfg, 'Andere Symptome', 'Other symptoms')}: {other_symptom_label(cfg, value)}"
 
 
 def _decode_symptom_selection(selected: list[str]) -> dict[str, Any]:

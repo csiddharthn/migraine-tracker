@@ -29,7 +29,7 @@ py -3 -m venv .venv
 ## 2. PostgreSQL lokal installieren
 
 ```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\install_portable_postgres.ps1
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File backend/database/scripts/initial_setup.ps1
 ```
 
 Das Skript lädt die offizielle Windows-Binärdistribution, legt Haupt- und Testdatenbank an und erzeugt eine lokale `.env` mit zufälligem Passwort. `.env`, Datenbankdateien und Laufzeitdateien werden von Git ignoriert. Passwörter und echte Datenbank-URLs dürfen nicht in YAML-, JSON- oder Quelldateien eingetragen werden.
@@ -41,7 +41,7 @@ Alternativ kann `MIGRAINE_DATABASE_URL` in `.streamlit/secrets.toml` als Streaml
 Danach kann der gesamte Erstlauf mit einem Befehl ausgeführt werden:
 
 ```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\initial_setup.ps1
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File backend/database/scripts/initial_setup.ps1
 ```
 
 Das Skript startet PostgreSQL, wartet auf die Datenbank und bringt das Schema mit Alembic auf den aktuellen Stand. Personen und Kopfschmerzeinträge werden anschließend direkt in der Anwendung angelegt.
@@ -49,8 +49,8 @@ Das Skript startet PostgreSQL, wartet auf die Datenbank und bringt das Schema mi
 Die portable Datenbank lässt sich später separat starten und beenden:
 
 ```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\start_postgres.ps1
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\stop_postgres.ps1
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File backend/database/scripts/start_postgres.ps1
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File backend/database/scripts/stop_postgres.ps1
 ```
 
 PostgreSQL ist lokal über Port `5433` erreichbar, damit eine bestehende Standardinstallation auf `5432` nicht gestört wird.
@@ -125,7 +125,7 @@ Der Bereich `Gespeicherte Daten` bietet einen schreibgeschützten Einblick in di
 ## Sicherung
 
 ```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\backup_database.ps1
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File backend/database/scripts/backup_database.ps1
 ```
 
 Sicherungen werden unter `backups/` abgelegt. Das Skript lehnt absichtlich Ziele außerhalb dieses Ordners ab.
@@ -135,7 +135,7 @@ Sicherungen werden unter `backups/` abgelegt. Das Skript lehnt absichtlich Ziele
 Zuerst Streamlit beenden, anschließend ausführen:
 
 ```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\restore_database.ps1 `
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File backend/database/scripts/restore_database.ps1 `
   -InputFile "backups\migraine_tracker_YYYYMMDD_HHMMSS.sql"
 ```
 

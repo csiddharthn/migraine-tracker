@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import date
 
+from frontend.config.name_space import cfg
 from frontend.i18n import (
     canonical_value,
     format_date_value,
@@ -42,22 +43,22 @@ TRIGGER_LABEL_P1_DE = "Eigener Auslöser"
 
 
 def test_month_date_and_number_formats_follow_language() -> None:
-    assert month_label(MONTH_2026_06, lang=LANG_DE) == MONTH_LABEL_DE
-    assert month_label(MONTH_2026_06, lang=LANG_EN) == MONTH_LABEL_EN
-    assert format_date_value(DATE_2026_06_09, lang=LANG_DE) == DATE_FORMAT_DE
-    assert format_date_value(DATE_2026_06_09, lang=LANG_EN) == DATE_FORMAT_EN
-    assert format_number(NUMBER_VALUE, NUMBER_PRECISION, lang=LANG_DE) == NUMBER_FORMAT_DE
-    assert format_number(NUMBER_VALUE, NUMBER_PRECISION, lang=LANG_EN) == NUMBER_FORMAT_EN
+    assert month_label(cfg, MONTH_2026_06, lang=LANG_DE) == MONTH_LABEL_DE
+    assert month_label(cfg, MONTH_2026_06, lang=LANG_EN) == MONTH_LABEL_EN
+    assert format_date_value(cfg, DATE_2026_06_09, lang=LANG_DE) == DATE_FORMAT_DE
+    assert format_date_value(cfg, DATE_2026_06_09, lang=LANG_EN) == DATE_FORMAT_EN
+    assert format_number(cfg, NUMBER_VALUE, NUMBER_PRECISION, lang=LANG_DE) == NUMBER_FORMAT_DE
+    assert format_number(cfg, NUMBER_VALUE, NUMBER_PRECISION, lang=LANG_EN) == NUMBER_FORMAT_EN
 
 
-def test_stored_values_are_localized_without_changing_the_canonical_value() -> None:
-    translated = localize_value(CANONICAL_COLD_DRAFT, lang=LANG_EN)
+def test_stored_values_are_localized_without_changing_the_canonical_value(cfg, ) -> None:
+    translated = localize_value(cfg, CANONICAL_COLD_DRAFT, lang=LANG_EN)
 
     assert translated == TRANSLATED_COLD_DRAFT
-    assert canonical_value(translated, lang=LANG_EN) == CANONICAL_COLD_DRAFT
-    assert localize_value(CANONICAL_RIGHT_EYE, lang=LANG_EN) == TRANSLATED_RIGHT_EYE
+    assert canonical_value(cfg, translated, lang=LANG_EN) == CANONICAL_COLD_DRAFT
+    assert localize_value(cfg, CANONICAL_RIGHT_EYE, lang=LANG_EN) == TRANSLATED_RIGHT_EYE
 
 
 def test_builtin_trigger_labels_are_localized_by_stable_code() -> None:
-    assert trigger_text(TRIGGER_CODE_5, TRIGGER_LABEL_5_DE, lang=LANG_EN) == TRIGGER_LABEL_5_EN
-    assert trigger_text(TRIGGER_CODE_P1, TRIGGER_LABEL_P1_DE, lang=LANG_EN) == TRIGGER_LABEL_P1_DE
+    assert trigger_text(cfg, TRIGGER_CODE_5, TRIGGER_LABEL_5_DE, lang=LANG_EN) == TRIGGER_LABEL_5_EN
+    assert trigger_text(cfg, TRIGGER_CODE_P1, TRIGGER_LABEL_P1_DE, lang=LANG_EN) == TRIGGER_LABEL_P1_DE
