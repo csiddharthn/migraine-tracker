@@ -59,6 +59,6 @@ def test_stored_values_are_localized_without_changing_the_canonical_value() -> N
     assert localize_value(cfg, CANONICAL_RIGHT_EYE, lang=LANG_EN) == TRANSLATED_RIGHT_EYE
 
 
-def test_builtin_trigger_labels_are_localized_by_stable_code(cfg) -> None:
+def test_builtin_trigger_labels_are_localized_by_stable_code() -> None:
     assert trigger_text(cfg, TRIGGER_CODE_5, TRIGGER_LABEL_5_DE, lang=LANG_EN) == TRIGGER_LABEL_5_EN
     assert trigger_text(cfg, TRIGGER_CODE_P1, TRIGGER_LABEL_P1_DE, lang=LANG_EN) == TRIGGER_LABEL_P1_DE
