@@ -1,5 +1,23 @@
 from __future__ import annotations
 
+"""Purpose: Structured notes parsing and timeline extraction.
+
+Usage: Parses sections, peaks, ranges, and single lines from notes.
+
+Functions available:
+- parse_timeline_notes
+- extract_peak
+- parse_range_line
+- parse_single_line
+
+Classes available:
+- TimelineNoteRow
+- StructuredNotes
+
+Call hierarchy:
+- structured_notes.py -> backend.note_interpretation.interpreter
+"""
+
 import re
 from dataclasses import dataclass
 from datetime import time

@@ -1,5 +1,19 @@
 from __future__ import annotations
 
+"""Purpose: PostgreSQL integration tests.
+
+Usage: Tests isolated schema creation and updates.
+
+Functions available:
+- test_postgres_create_and_update_in_isolated_schema
+
+Classes available:
+- None
+
+Call hierarchy:
+- test_postgres_integration.py -> backend.services, backend.database
+"""
+
 import uuid
 from datetime import date, time
 from decimal import Decimal

@@ -1,5 +1,19 @@
 from __future__ import annotations
 
+"""Purpose: Alembic migration environment configuration.
+
+Usage: Configures database URL and target metadata for migrations.
+
+Functions available:
+- run_migrations_offline, run_migrations_online
+
+Classes available:
+- None
+
+Call hierarchy:
+- env.py -> alembic, backend.config, backend.database.base
+"""
+
 from logging.config import fileConfig
 
 from alembic import context

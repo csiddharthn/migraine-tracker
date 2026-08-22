@@ -1,5 +1,19 @@
 from __future__ import annotations
 
+"""Purpose: Database explorer repository for multi-user data isolation.
+
+Usage: Provides counts and exploration methods per user.
+
+Functions available:
+- DatabaseExplorerRepository.counts, explore, etc.
+
+Classes available:
+- DatabaseExplorerRepository
+
+Call hierarchy:
+- database_explorer.py -> backend.models
+"""
+
 import uuid
 
 from sqlalchemy import func, select

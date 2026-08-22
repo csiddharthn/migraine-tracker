@@ -1,5 +1,19 @@
 from __future__ import annotations
 
+"""Purpose: Database explorer isolation tests.
+
+Usage: Tests multi-user data isolation.
+
+Functions available:
+- test_database_explorer_scopes_personal_tables
+
+Classes available:
+- None
+
+Call hierarchy:
+- test_database_explorer.py -> backend.services.database_explorer
+"""
+
 from datetime import date, time
 from decimal import Decimal
 

@@ -1,5 +1,19 @@
 from __future__ import annotations
 
+"""Purpose: Shared test fixtures.
+
+Usage: Provides session and user fixtures for tests.
+
+Functions available:
+- session (fixture), user (fixture)
+
+Classes available:
+- None
+
+Call hierarchy:
+- conftest.py -> backend.database.base, backend.services.user_service
+"""
+
 from datetime import date
 
 import pytest

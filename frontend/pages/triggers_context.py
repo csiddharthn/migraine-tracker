@@ -1,5 +1,19 @@
 from __future__ import annotations
 
+"""Purpose: Triggers context page showing trigger correlations.
+
+Usage: Displays trigger summaries and context patterns.
+
+Functions available:
+- None (page script)
+
+Classes available:
+- None
+
+Call hierarchy:
+- triggers_context.py -> backend.analytics.calculations, frontend.components
+"""
+
 import streamlit as st
 
 from backend.analytics.calculations import context_summary, trigger_summary

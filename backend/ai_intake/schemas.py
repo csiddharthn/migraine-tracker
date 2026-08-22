@@ -1,5 +1,24 @@
 from __future__ import annotations
 
+"""Purpose: Pydantic schemas for AI intake drafts and timeline rows.
+
+Usage: Defines AITimelineRow, AIIntakeDraft, and related models
+used by AIIntakeService for structured output validation.
+
+Functions available:
+- None (schema definitions)
+
+Classes available:
+- AITimelineRow
+- AIIntakeDraft
+- AIClarificationQuestion
+- AIMedicationDraft
+
+Call hierarchy:
+- schemas.py -> pydantic.BaseModel, Field, field_validator
+- schemas.py -> backend.note_interpretation.StructuredNotes, TimelineNoteRow
+"""
+
 import hashlib
 from datetime import date, time
 from typing import Literal

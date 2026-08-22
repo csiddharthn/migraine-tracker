@@ -1,5 +1,19 @@
 from __future__ import annotations
 
+"""Purpose: Tests for AI intake service and schemas.
+
+Usage: Tests AIIntakeService, AIIntakeDraft, and transcription.
+
+Functions available:
+- ai_service_factory (fixture), make_trigger, test_extract, etc.
+
+Classes available:
+- FakeCompletions, FakeClient
+
+Call hierarchy:
+- test_ai_intake.py -> backend.ai_intake
+"""
+
 from datetime import date
 from types import SimpleNamespace
 

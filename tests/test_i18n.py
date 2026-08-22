@@ -1,5 +1,19 @@
 from __future__ import annotations
 
+"""Purpose: Tests for internationalization utilities.
+
+Usage: Tests translation, formatting, and localization.
+
+Functions available:
+- test_localize_value, test_format_date_value, etc.
+
+Classes available:
+- None
+
+Call hierarchy:
+- test_i18n.py -> frontend.i18n, frontend.config.name_space
+"""
+
 from datetime import date
 
 from frontend.config.name_space import cfg

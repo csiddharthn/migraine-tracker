@@ -1,5 +1,19 @@
 from __future__ import annotations
 
+"""Purpose: Filter components for report period selection.
+
+Usage: Renders sidebar date range filters.
+
+Functions available:
+- render_report_period, report_period
+
+Classes available:
+- None
+
+Call hierarchy:
+- filters.py -> backend.models.UserProfile, frontend.i18n
+"""
+
 import calendar
 from datetime import date
 from typing import Iterable

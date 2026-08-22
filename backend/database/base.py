@@ -1,5 +1,20 @@
 from __future__ import annotations
 
+"""Purpose: SQLAlchemy base classes and naming conventions.
+
+Usage: Defines Base (DeclarativeBase) and TimestampMixin for all models.
+
+Functions available:
+- None
+
+Classes available:
+- Base
+- TimestampMixin
+
+Call hierarchy:
+- base.py -> sqlalchemy
+"""
+
 from datetime import datetime, timezone
 
 from sqlalchemy import DateTime, MetaData

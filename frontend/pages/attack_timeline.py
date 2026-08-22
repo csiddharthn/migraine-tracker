@@ -1,5 +1,19 @@
 from __future__ import annotations
 
+"""Purpose: Attack timeline page showing daily headache timing.
+
+Usage: Displays timeline charts and onset summaries.
+
+Functions available:
+- None (page script)
+
+Classes available:
+- None
+
+Call hierarchy:
+- attack_timeline.py -> backend.analytics.calculations, frontend.components
+"""
+
 import streamlit as st
 
 from backend.analytics.calculations import monthly_summaries, onset_summary

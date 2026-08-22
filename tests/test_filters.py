@@ -1,3 +1,17 @@
+"""Purpose: Tests for filter components.
+
+Usage: Tests latest_month_range and boundary handling.
+
+Functions available:
+- test_latest_month_range_uses_latest_month_with_data, etc.
+
+Classes available:
+- None
+
+Call hierarchy:
+- test_filters.py -> frontend.components.filters
+"""
+
 from datetime import date
 
 import pytest

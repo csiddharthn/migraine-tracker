@@ -1,5 +1,19 @@
 from __future__ import annotations
 
+"""Purpose: Trigger service for trigger definition management.
+
+Usage: Creates and validates trigger definitions.
+
+Functions available:
+- TriggerService.create
+
+Classes available:
+- TriggerService, DuplicateTriggerError
+
+Call hierarchy:
+- trigger_service.py -> backend.repositories.triggers
+"""
+
 from sqlalchemy.orm import Session
 
 from backend.models import TriggerDefinition

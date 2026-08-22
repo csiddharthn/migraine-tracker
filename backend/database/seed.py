@@ -1,5 +1,19 @@
 from __future__ import annotations
 
+"""Purpose: Seed reference data (triggers) into the database.
+
+Usage: seed_reference_data inserts predefined TriggerDefinition rows.
+
+Functions available:
+- seed_reference_data
+
+Classes available:
+- None
+
+Call hierarchy:
+- seed.py -> backend.models.TriggerDefinition
+"""
+
 from sqlalchemy.orm import Session
 
 from backend.models import TriggerDefinition

@@ -1,5 +1,19 @@
 from __future__ import annotations
 
+"""Purpose: Tests for AI transcription service.
+
+Usage: Tests GroqTranscriptionService with mock audio.
+
+Functions available:
+- audio_sample (fixture), test_transcription
+
+Classes available:
+- None
+
+Call hierarchy:
+- test_ai_transcription.py -> backend.ai_intake.transcription
+"""
+
 from types import SimpleNamespace
 
 import pytest

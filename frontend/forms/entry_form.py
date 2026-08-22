@@ -1,5 +1,19 @@
 from __future__ import annotations
 
+"""Purpose: Entry form for migraine entry input.
+
+Usage: Renders form fields for entry creation and editing.
+
+Functions available:
+- render_entry_form
+
+Classes available:
+- None
+
+Call hierarchy:
+- entry_form.py -> backend.services.schemas, backend.note_interpretation
+"""
+
 from datetime import date, time, timedelta
 from decimal import Decimal
 from typing import Any

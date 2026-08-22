@@ -1,5 +1,19 @@
 from __future__ import annotations
 
+"""Purpose: Tests for entry service operations.
+
+Usage: Tests entry creation, updates, and medication summaries.
+
+Functions available:
+- payload, test_create_and_update, etc.
+
+Classes available:
+- None
+
+Call hierarchy:
+- test_entry_service.py -> backend.services.entry_service
+"""
+
 from datetime import date, time
 from decimal import Decimal
 

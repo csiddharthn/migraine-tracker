@@ -1,5 +1,19 @@
 from __future__ import annotations
 
+"""Purpose: User settings component for user selection.
+
+Usage: Renders sidebar user selection and settings.
+
+Functions available:
+- render_user_settings
+
+Classes available:
+- None
+
+Call hierarchy:
+- users.py -> backend.services.user_service, frontend.i18n
+"""
+
 from datetime import date
 
 import streamlit as st

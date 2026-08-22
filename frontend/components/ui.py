@@ -1,5 +1,19 @@
 from __future__ import annotations
 
+"""Purpose: UI styling and layout components.
+
+Usage: Applies CSS styles and renders UI elements.
+
+Functions available:
+- apply_ui
+
+Classes available:
+- None
+
+Call hierarchy:
+- ui.py -> frontend.config.name_space, frontend.i18n
+"""
+
 from datetime import date
 from typing import Any
 

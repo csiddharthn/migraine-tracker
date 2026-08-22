@@ -1,5 +1,19 @@
 from __future__ import annotations
 
+"""Purpose: Streamlit session state and database session management.
+
+Usage: Provides session_factory and database_session context manager.
+
+Functions available:
+- session_factory, database_session
+
+Classes available:
+- None
+
+Call hierarchy:
+- state.py -> backend.database.session, backend.config
+"""
+
 from contextlib import contextmanager
 from typing import Iterator
 

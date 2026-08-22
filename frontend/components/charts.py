@@ -1,5 +1,19 @@
 from __future__ import annotations
 
+"""Purpose: Chart rendering components using plotly.
+
+Usage: Provides chart functions for trends, timelines, and statistics.
+
+Functions available:
+- render_frequency_chart, render_timeline_chart, etc.
+
+Classes available:
+- None
+
+Call hierarchy:
+- charts.py -> backend.analytics.calculations, frontend.i18n
+"""
+
 import calendar
 from datetime import date, timedelta
 from typing import Iterable, Literal

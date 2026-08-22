@@ -1,5 +1,19 @@
 from __future__ import annotations
 
+"""Purpose: Internationalization and translation utilities.
+
+Usage: Provides tr(), current_language(), and localize_value().
+
+Functions available:
+- current_language, tr, localize_value
+
+Classes available:
+- None
+
+Call hierarchy:
+- i18n.py -> frontend.config.name_space
+"""
+
 import re
 from datetime import date, datetime
 from decimal import Decimal

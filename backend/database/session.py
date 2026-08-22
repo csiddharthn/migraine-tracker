@@ -1,5 +1,22 @@
 from __future__ import annotations
 
+"""Purpose: Database session management and engine creation.
+
+Usage: Provides create_engine_from_url, create_session_factory,
+and session_scope context manager.
+
+Functions available:
+- create_engine_from_url
+- create_session_factory
+- session_scope
+
+Classes available:
+- None
+
+Call hierarchy:
+- session.py -> sqlalchemy
+"""
+
 from collections.abc import Iterator
 from contextlib import contextmanager
 

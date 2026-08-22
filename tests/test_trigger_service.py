@@ -1,5 +1,19 @@
 from __future__ import annotations
 
+"""Purpose: Tests for trigger service.
+
+Usage: Tests trigger creation, duplicate detection, and code generation.
+
+Functions available:
+- test_trigger_service_creates_next_global_code, etc.
+
+Classes available:
+- None
+
+Call hierarchy:
+- test_trigger_service.py -> backend.services.trigger_service
+"""
+
 import pytest
 
 from backend.services.trigger_service import DuplicateTriggerError, TriggerService

@@ -1,5 +1,19 @@
 from __future__ import annotations
 
+"""Purpose: Analytics service for dataset generation and statistics.
+
+Usage: Builds AnalyticsDataset from repository entries.
+
+Functions available:
+- AnalyticsService.dataset
+
+Classes available:
+- AnalyticsService
+
+Call hierarchy:
+- analytics_service.py -> backend.analytics.calculations, backend.repositories
+"""
+
 from datetime import date
 
 from sqlalchemy.orm import Session

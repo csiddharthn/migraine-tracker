@@ -1,3 +1,17 @@
+"""Purpose: Frontend namespace configuration.
+
+Usage: Defines cfg with language labels, aura labels, and constants.
+
+Functions available:
+- None
+
+Classes available:
+- cfg
+
+Call hierarchy:
+- name_space.py -> frontend.i18n
+"""
+
 class cfg:
     DEFAULT_LANGUAGE = "de"
     LANGUAGE_LABELS = {"de": "Deutsch", "en": "English"}

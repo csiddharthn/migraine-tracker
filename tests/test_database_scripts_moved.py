@@ -1,3 +1,17 @@
+"""Purpose: Tests for database script file locations.
+
+Usage: Verifies scripts moved to backend/database/scripts.
+
+Functions available:
+- test_database_scripts_exist, test_references_updated
+
+Classes available:
+- None
+
+Call hierarchy:
+- test_database_scripts_moved.py -> None
+"""
+
 import os
 from pathlib import Path
 

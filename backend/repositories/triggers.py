@@ -1,5 +1,19 @@
 from __future__ import annotations
 
+"""Purpose: Trigger repository for trigger definition management.
+
+Usage: Lists, retrieves, and creates trigger definitions.
+
+Functions available:
+- TriggerRepository.list_all, get_by_label, next_numeric_code, next_sort_order
+
+Classes available:
+- TriggerRepository
+
+Call hierarchy:
+- triggers.py -> backend.models.TriggerDefinition
+"""
+
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 

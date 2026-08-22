@@ -1,5 +1,19 @@
 from __future__ import annotations
 
+"""Purpose: Entries page for recording and editing migraine entries.
+
+Usage: Provides forms for entry creation, editing, and trigger management.
+
+Functions available:
+- None (page script)
+
+Classes available:
+- None
+
+Call hierarchy:
+- entries.py -> backend.services.entry_service, frontend.forms
+"""
+
 from datetime import date
 
 import streamlit as st

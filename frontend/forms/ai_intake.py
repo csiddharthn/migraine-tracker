@@ -1,5 +1,19 @@
 from __future__ import annotations
 
+"""Purpose: AI intake form for generating intake drafts.
+
+Usage: Renders AI intake form and handles transcription.
+
+Functions available:
+- render_ai_intake
+
+Classes available:
+- None
+
+Call hierarchy:
+- ai_intake.py -> backend.ai_intake, backend.services.entry_service
+"""
+
 from datetime import date
 
 import streamlit as st

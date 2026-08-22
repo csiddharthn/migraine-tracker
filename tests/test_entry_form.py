@@ -1,5 +1,19 @@
 from __future__ import annotations
 
+"""Purpose: Tests for entry form validation and decoding.
+
+Usage: Tests symptom selection mapping and validation errors.
+
+Functions available:
+- test_unified_symptom_selection_maps_to_existing_fields, etc.
+
+Classes available:
+- None
+
+Call hierarchy:
+- test_entry_form.py -> frontend.forms.entry_form
+"""
+
 from datetime import time
 
 from backend.note_interpretation import TimelineNoteRow

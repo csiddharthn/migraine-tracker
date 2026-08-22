@@ -1,5 +1,19 @@
 from __future__ import annotations
 
+"""Purpose: Multi-user isolation tests.
+
+Usage: Verifies analytics isolation between users.
+
+Functions available:
+- test_same_date_is_allowed_for_different_users_and_analytics_are_isolated
+
+Classes available:
+- None
+
+Call hierarchy:
+- test_multi_user_isolation.py -> backend.services
+"""
+
 from datetime import date
 from decimal import Decimal
 

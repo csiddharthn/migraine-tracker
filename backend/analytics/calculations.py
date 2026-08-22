@@ -1,5 +1,20 @@
 from __future__ import annotations
 
+"""Purpose: Analytics calculations for migraine frequency, intensity, and patterns.
+
+Usage: Computes rolling statistics, medication overuse, and trigger correlations.
+
+Functions available:
+- AnalyticsDataset.build
+- AnalyticsDataset methods
+
+Classes available:
+- AnalyticsDataset
+
+Call hierarchy:
+- calculations.py -> backend.models, backend.config.name_space
+"""
+
 import math
 from collections import Counter, defaultdict
 from dataclasses import dataclass

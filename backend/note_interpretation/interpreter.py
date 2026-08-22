@@ -1,5 +1,20 @@
 from __future__ import annotations
 
+"""Purpose: Note interpretation and timeline parsing.
+
+Usage: Parses headache descriptions for onset times, triggers, and symptoms.
+
+Functions available:
+- parse_timeline_notes
+- interpret_context
+
+Classes available:
+- None
+
+Call hierarchy:
+- interpreter.py -> backend.note_interpretation.structured_notes
+"""
+
 import re
 from dataclasses import asdict, dataclass
 from typing import Any

@@ -1,5 +1,19 @@
 from __future__ import annotations
 
+"""Purpose: User service for user profile management.
+
+Usage: Creates and validates user profiles.
+
+Functions available:
+- UserService.create, normalize_name
+
+Classes available:
+- UserService, DuplicateUserError
+
+Call hierarchy:
+- user_service.py -> backend.repositories.users
+"""
+
 import re
 import unicodedata
 from datetime import date

@@ -1,3 +1,17 @@
+"""Purpose: Tests for structured notes parsing.
+
+Usage: Tests timeline parsing and midnight-crossing peaks.
+
+Functions available:
+- test_structured_notes_round_trip_and_feed_time_interpretation, etc.
+
+Classes available:
+- None
+
+Call hierarchy:
+- test_structured_notes.py -> backend.note_interpretation
+"""
+
 from datetime import time
 
 from backend.note_interpretation import (

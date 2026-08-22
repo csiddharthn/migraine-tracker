@@ -1,5 +1,19 @@
 from __future__ import annotations
 
+"""Purpose: User repository for user profile management.
+
+Usage: Retrieves and lists UserProfile records.
+
+Functions available:
+- UserRepository.get, get_by_name_key, list_users
+
+Classes available:
+- UserRepository
+
+Call hierarchy:
+- users.py -> backend.models.UserProfile
+"""
+
 import uuid
 
 from sqlalchemy import select

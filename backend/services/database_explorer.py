@@ -1,5 +1,19 @@
 from __future__ import annotations
 
+"""Purpose: Database explorer service for table exploration.
+
+Usage: Provides descriptors and row exploration for database tables.
+
+Functions available:
+- DatabaseExplorerService.describe_tables, explore_table
+
+Classes available:
+- DatabaseExplorerService, TableDescriptor, DatabaseTable
+
+Call hierarchy:
+- database_explorer.py -> backend.repositories.database_explorer
+"""
+
 import json
 import uuid
 from dataclasses import dataclass

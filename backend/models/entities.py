@@ -1,5 +1,21 @@
 from __future__ import annotations
 
+"""Purpose: SQLAlchemy entity models for migraine tracking.
+
+Usage: Defines UserProfile, MigraineEntry, MedicationIntake, TriggerDefinition,
+EntryTrigger, DailyRecord, NoteInterpretation, EntryAuditLog, MigrationSourceRow.
+
+Functions available:
+- None
+
+Classes available:
+- UserProfile, MigraineEntry, MedicationIntake, TriggerDefinition,
+  EntryTrigger, DailyRecord, NoteInterpretation, EntryAuditLog, MigrationSourceRow
+
+Call hierarchy:
+- entities.py -> backend.database.base
+"""
+
 import uuid
 from datetime import date, datetime, time
 from decimal import Decimal
@@ -32,6 +48,14 @@ JSON_DOCUMENT = JSON().with_variant(JSONB, "postgresql")
 
 
 class UserProfile(TimestampMixin, Base):
+    """Purpose: User profile entity.
+
+    Methodology: Stores user identity, tracking start, and active status.
+
+    Arguments: None (entity definition)
+
+    Returns: None
+    """
     __tablename__ = "user_profiles"
     __table_args__ = (Index("ix_user_profiles_active_display_name", "active", "display_name"),)
 

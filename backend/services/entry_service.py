@@ -1,5 +1,19 @@
 from __future__ import annotations
 
+"""Purpose: Entry service for migraine entry management.
+
+Usage: Creates, updates, deletes, and interprets migraine entries.
+
+Functions available:
+- EntryService.create, update, delete, interpret
+
+Classes available:
+- EntryService, DuplicateEntryError, EntryNotFoundError
+
+Call hierarchy:
+- entry_service.py -> backend.repositories, backend.note_interpretation
+"""
+
 import uuid
 from datetime import datetime, timezone
 from decimal import Decimal

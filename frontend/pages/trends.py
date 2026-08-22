@@ -1,5 +1,19 @@
 from __future__ import annotations
 
+"""Purpose: Trends page showing frequency over time.
+
+Usage: Displays monthly summaries, rolling intervals, and weekday rates.
+
+Functions available:
+- None (page script)
+
+Classes available:
+- None
+
+Call hierarchy:
+- trends.py -> backend.analytics.calculations, frontend.components
+"""
+
 import streamlit as st
 
 from backend.analytics.calculations import monthly_summaries, rolling_interval, weekday_summary

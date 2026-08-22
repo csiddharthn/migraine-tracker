@@ -1,5 +1,19 @@
 from __future__ import annotations
 
+"""Purpose: Entry repository for migraine entry CRUD operations.
+
+Usage: Manages MigraineEntry, triggers, medications, and interpretations.
+
+Functions available:
+- EntryRepository.get, list, create, update, delete
+
+Classes available:
+- EntryRepository
+
+Call hierarchy:
+- entries.py -> backend.models
+"""
+
 import uuid
 from datetime import date
 

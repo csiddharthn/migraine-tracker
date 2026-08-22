@@ -36,6 +36,23 @@ class AIIntakeError(RuntimeError):
 
 
 class AIIntakeService:
+    """Purpose: Service for generating AI intake drafts from narratives.
+
+    Methodology: Uses configured AI providers to process cleaned narratives,
+    validates responses against AIIntakeDraft schema, and normalizes output.
+
+    Arguments:
+    - api_key: API authentication key
+    - models: Sequence of model names to attempt
+    - model: Primary model name
+    - prompt_version: Version identifier for prompts
+    - timeout_seconds: Request timeout
+    - client_factory: Optional factory for creating clients
+
+    Returns:
+    - AIIntakeDraft: Structured intake draft
+    """
+
     def __init__(
         self,
         *,

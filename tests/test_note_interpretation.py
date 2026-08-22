@@ -1,5 +1,19 @@
 from __future__ import annotations
 
+"""Purpose: Tests for note interpretation.
+
+Usage: Tests NoteInterpreter extraction of onset, peak, end, and context.
+
+Functions available:
+- test_shared_uhr_ranges_and_laterality_are_extracted
+
+Classes available:
+- None
+
+Call hierarchy:
+- test_note_interpretation.py -> backend.note_interpretation
+"""
+
 from backend.note_interpretation import NoteInterpreter
 
 NOTES_FULL = (

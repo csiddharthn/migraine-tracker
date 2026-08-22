@@ -1,5 +1,19 @@
 from __future__ import annotations
 
+"""Purpose: Service-level Pydantic schemas for input validation.
+
+Usage: Defines EntryInput, EntryPatch, MedicationInput, etc.
+
+Functions available:
+- None (schema definitions)
+
+Classes available:
+- EntryInput, EntryPatch, MedicationInput, TriggerInput
+
+Call hierarchy:
+- schemas.py -> pydantic
+"""
+
 from datetime import date, time
 from decimal import Decimal
 from typing import Any

@@ -1,8 +1,24 @@
 from __future__ import annotations
 
+"""Purpose: Tests for chart rendering components.
+
+Usage: Tests plotly chart outputs with mock data.
+
+Functions available:
+- chart_entries_factory (fixture), test_charts
+
+Classes available:
+- None
+
+Call hierarchy:
+- test_charts.py -> frontend.components.charts
+"""
+
 from datetime import date
 from decimal import Decimal
 from types import SimpleNamespace
+
+import pytest
 
 from frontend.components.charts import (
     STRENGTH_COLORS,

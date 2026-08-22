@@ -1,3 +1,17 @@
+"""Purpose: Tests for MECE page ownership and chart assignments.
+
+Usage: Verifies charts are assigned to correct pages.
+
+Functions available:
+- test_chart_ownership_matches_navigation
+
+Classes available:
+- None
+
+Call hierarchy:
+- test_mece_page_ownership.py -> frontend.components.charts
+"""
+
 from pathlib import Path
 
 EXPECTED_OWNERS = {
