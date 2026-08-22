@@ -116,7 +116,7 @@ def aura_label(cfg, code: str, *, lang: str | None = None) -> str:
 
 def other_symptom_label(cfg, code: str, *, lang: str | None = None) -> str:
     german, english = cfg.OTHER_SYMPTOM_LABELS.get(code, (code, code))
-    return tr(german, english, lang=lang)
+    return tr(cfg, german, english, lang=lang)
 
 
 def derived_laterality_label(cfg, code: str, *, lang: str | None = None) -> str:
