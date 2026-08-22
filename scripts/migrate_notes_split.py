@@ -6,12 +6,15 @@ import sys
 sys.path.insert(0, "/workspace")
 
 from backend.note_interpretation.structured_notes import parse_structured_notes
-from backend.database.session import get_session
+from backend.config import get_settings
+from backend.database.session import create_session_factory
 from sqlalchemy import text
 
 
 def migrate():
-    session = get_session()
+    settings = get_settings()
+    factory = create_session_factory(settings.database_url)
+    with factory() as session:
     result = session.execute(text("SELECT id, notes FROM migraine_entries"))
     rows = result.fetchall()
     for row in rows:

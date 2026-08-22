@@ -76,7 +76,10 @@ with database_session() as session:
             for entry in entries:
                 haystack = " ".join(
                     [
-                        entry.notes,
+                        entry.timeline_notes,
+                        entry.possible_factors,
+                        entry.symptoms_and_actions,
+                        entry.other_notes,
                         " ".join(item.name for item in entry.medications),
                         " ".join(item.dose or "" for item in entry.medications),
                         " ".join(localized_trigger_label(cfg, trigger.trigger_code, trigger.definition.label) for trigger in entry.triggers),

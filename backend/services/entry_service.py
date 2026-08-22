@@ -208,7 +208,7 @@ class EntryService:
                 "confidence": automatic_result.confidence,
             }
             merged_annotation.update(reviewed_annotation)
-            result = self.interpreter.interpret(entry.notes, entry.entered_laterality, merged_annotation)
+            result = self.interpreter.interpret(entry.timeline_notes, entry.entered_laterality, merged_annotation)
         snapshot = result.to_payload()
         current = entry.interpretation
         if current is not None and preserve_review and current.is_reviewed:
@@ -301,7 +301,10 @@ class EntryService:
                 }
                 for item in entry.medications
             ],
-            "notes": entry.notes,
+            "timeline_notes": entry.timeline_notes,
+            "possible_factors": entry.possible_factors,
+            "symptoms_and_actions": entry.symptoms_and_actions,
+            "other_notes": entry.other_notes,
             "source_system": entry.source_system,
             "ai_provider": entry.ai_provider,
             "ai_model": entry.ai_model,

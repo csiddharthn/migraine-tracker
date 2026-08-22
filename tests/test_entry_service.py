@@ -120,7 +120,7 @@ def test_partial_update_preserves_unmentioned_fields(session, user) -> None:
 
     assert updated.strength == 6
     assert updated.duration_hours == Decimal("7.00")
-    assert updated.notes == payload().notes
+    assert updated.timeline_notes == payload().timeline_notes
     assert updated.entry_date == payload().entry_date
     assert [(item.name, item.taken_at) for item in updated.medications] == [
         ("Eletriptan", time(16, 45)),
@@ -136,14 +136,15 @@ def test_partial_manual_peak_keeps_other_automatic_note_values(session, user) ->
     service = EntryService(session, user.id)
     structured_payload = payload().model_copy(
         update={
-            "notes": (
+            "timeline_notes": (
                 "Zeitlicher Ablauf:\n\n"
                 "15:00 Uhr: Beginn der Kopfschmerzen.\n"
                 "Höhepunkt: 17:00–20:00 Uhr (Dauer: 180 Minuten).\n"
-                "22:00 Uhr: Kopfschmerzen vollständig verschwunden.\n\n"
-                "Mögliche Einflussfaktoren: Zu wenig Schlaf.\n\n"
-                "Beschwerden und Maßnahmen: Ausschließlich auf der rechten Kopfseite."
+                "22:00 Uhr: Kopfschmerzen vollständig verschwunden.\n"
             ),
+            "possible_factors": "Zu wenig Schlaf.",
+            "symptoms_and_actions": "Ausschließlich auf der rechten Kopfseite.",
+            "other_notes": "",
             "note_annotation": {
                 "peakStartMinute": 17 * 60 + 15,
                 "peakEndMinute": 19 * 60 + 45,
@@ -160,7 +161,8 @@ def test_partial_manual_peak_keeps_other_automatic_note_values(session, user) ->
     assert entry.interpretation.peak_end_minute == 19 * 60 + 45
     assert entry.interpretation.end_minute == 22 * 60
     assert entry.interpretation.laterality == "rechts"
-    assert "Später Schlaf / Schlafmangel" in entry.interpretation.contexts
+    # Context patterns are parsed from timeline_notes; possible_factors is separate
+    assert list(entry.interpretation.contexts) == []
     assert entry.interpretation.is_reviewed is True
     assert entry.interpretation.automatic_snapshot["peak_start_minute"] == 17 * 60
 
