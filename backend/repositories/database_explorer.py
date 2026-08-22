@@ -11,7 +11,6 @@ from backend.models import (
     EntryTrigger,
     MedicationIntake,
     MigraineEntry,
-    MigrationSourceRow,
     NoteInterpretation,
     TriggerDefinition,
     UserProfile,
@@ -104,15 +103,6 @@ class DatabaseExplorerRepository:
             .order_by(EntryAuditLog.changed_at.desc())
         )
         return list(self.session.execute(statement).tuples())
-
-    def migration_rows(self) -> list[MigrationSourceRow]:
-        return list(
-            self.session.scalars(
-                select(MigrationSourceRow)
-                .where(MigrationSourceRow.user_id == self.user_id)
-                .order_by(MigrationSourceRow.record_date.desc(), MigrationSourceRow.source_row.desc())
-            )
-        )
 
     def _count(self, model: type, *conditions: object) -> int:
         statement = select(func.count()).select_from(model)

@@ -59,7 +59,7 @@ class EntryService:
     ) -> MigraineEntry:
         if self.repository.get_by_date(payload.entry_date) is not None:
             raise DuplicateEntryError(f"Für den {payload.entry_date:%d.%m.%Y} existiert bereits ein Eintrag.")
-        self._validate_triggers(payload.trigger_codes, include_inactive=origin == "excel_migration")
+        self._validate_triggers(payload.trigger_codes)
 
         entry_values = payload.model_dump(include=set(self.ENTRY_FIELDS))
         entry = MigraineEntry(user_id=self.user_id, **entry_values, source_system=origin)
@@ -100,7 +100,8 @@ class EntryService:
         if trigger_codes is not None:
             if not trigger_codes:
                 raise ValueError("Mindestens ein Auslöser ist erforderlich.")
-            self._validate_triggers(trigger_codes, include_inactive=origin == "excel_migration")
+            existing_codes = {trigger.trigger_code for trigger in entry.triggers}
+            self._validate_triggers(trigger_codes, allowed_inactive_codes=existing_codes)
             entry.triggers = [EntryTrigger(trigger_code=code) for code in trigger_codes]
 
         medications = changes.pop("medications", None)
@@ -220,8 +221,9 @@ class EntryService:
         self.session.flush()
         return record
 
-    def _validate_triggers(self, codes: list[str], *, include_inactive: bool = False) -> None:
-        valid = {item.code for item in self.repository.list_trigger_definitions(active_only=not include_inactive)}
+    def _validate_triggers(self, codes: list[str], *, allowed_inactive_codes: set[str] | None = None) -> None:
+        valid = {item.code for item in self.repository.list_trigger_definitions()}
+        valid.update(allowed_inactive_codes or set())
         unknown = sorted(set(codes) - valid)
         if unknown:
             raise ValueError(f"Unbekannte Auslöser-Codes: {', '.join(unknown)}")

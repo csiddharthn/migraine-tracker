@@ -43,6 +43,15 @@ def test_create_and_duplicate_prevention(session, user) -> None:
         service.create(payload())
 
 
+def test_legacy_inactive_trigger_can_be_preserved_but_not_added(session, user) -> None:
+    service = EntryService(session, user.id)
+
+    with pytest.raises(ValueError):
+        service._validate_triggers(["ND"])
+
+    service._validate_triggers(["ND"], allowed_inactive_codes={"ND"})
+
+
 def test_create_ai_assisted_entry_preserves_provenance(session, user) -> None:
     service = EntryService(session, user.id)
     ai_payload = payload().model_copy(

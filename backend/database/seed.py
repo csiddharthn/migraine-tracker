@@ -35,7 +35,7 @@ def seed_reference_data(session: Session) -> None:
             TriggerDefinition(
                 code="ND",
                 label="Nicht dokumentiert (Altbestand)",
-                description="Nur für migrierte Excel-Einträge ohne ausgefüllten Auslöser.",
+                description="Nur für ältere Einträge ohne dokumentierten Auslöser.",
                 sort_order=99,
                 active=False,
             )

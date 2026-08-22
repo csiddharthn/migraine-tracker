@@ -1,26 +1,19 @@
 from __future__ import annotations
 
-from collections import Counter
-
-import pandas as pd
 import streamlit as st
-from sqlalchemy import select
 
 from backend.analytics.calculations import data_quality
-from backend.models import MigrationSourceRow
 from frontend.components.charts import completeness_chart
 from frontend.components.state import database_session
-from frontend.components.ui import apply_ui, chart_config, format_date, page_header
-from frontend.components.users import selected_user
-from frontend.i18n import localize_value, tr
+from frontend.components.ui import apply_ui, chart_config, page_header
+from frontend.i18n import tr
 from frontend.pages.page_utils import filtered_dataset
 
 
 apply_ui()
-page_header(tr("Datenprüfung und Berechnung", "Data checks and calculations"), tr("Welche Angaben vorhanden sind, woher die Daten stammen und wie die Auswertungen berechnet werden.", "Which information is available, where the data came from, and how the analyses are calculated."))
+page_header(tr("Datenprüfung und Berechnung", "Data checks and calculations"), tr("Welche Angaben vorhanden sind und wie die Auswertungen berechnet werden.", "Which information is available and how the analyses are calculated."))
 
 with database_session() as session:
-    user = selected_user(session)
     data = filtered_dataset(session)
     quality = data_quality(data)
     total = max(1, quality["total"])
@@ -35,46 +28,6 @@ with database_session() as session:
     ]
     st.subheader(tr("Welche Angaben sind ausgefüllt?", "Which information has been filled in?"))
     st.plotly_chart(completeness_chart(completeness), width="stretch", config=chart_config())
-
-    st.subheader(tr("Wie kamen die vorhandenen Daten in die App?", "How did the existing data enter the app?"))
-    source_rows = list(session.scalars(select(MigrationSourceRow).where(MigrationSourceRow.user_id == user.id)))
-    statuses = Counter(row.status for row in source_rows)
-    status_labels = {
-        "daily_only": "Aus Excel übernommene Tage ohne Kopfschmerzen",
-        "imported": "Aus Excel übernommene Kopfschmerzeinträge",
-        "updated": "Beim erneuten Excel-Import aktualisiert",
-        "skipped": "Bereits unverändert aus Excel übernommen",
-        "duplicate": "Doppelte Excel-Zeilen",
-        "rejected": "Nicht übernommene Excel-Zeilen",
-    }
-    provenance = [
-        {"label": localize_value(status_labels.get(status, status)), "count": count}
-        for status, count in sorted(statuses.items())
-        if count
-    ]
-    if provenance:
-        provenance_columns = st.columns(min(4, len(provenance)))
-        for index, item in enumerate(provenance):
-            provenance_columns[index % len(provenance_columns)].metric(item["label"], item["count"])
-    else:
-        st.info(tr("Für diese Person liegen keine Importinformationen vor.", "No import information is available for this person."))
-    warnings = [row for row in source_rows if row.issues]
-    if warnings:
-        warning_count = len(warnings)
-        warning_row_word = tr("Zeile" if warning_count == 1 else "Zeilen", "row" if warning_count == 1 else "rows")
-        warning_verb = "contains" if warning_count == 1 else "contain"
-        st.warning(tr(f"Bei {warning_count} aus Excel übernommenen {warning_row_word} gab es Hinweise, die geprüft werden sollten.", f"{warning_count} {warning_row_word} imported from Excel {warning_verb} notes that should be reviewed."))
-        st.dataframe(
-            pd.DataFrame(
-                {
-                    tr("Datum", "Date"): [format_date(row.record_date) for row in warnings],
-                    tr("Excel-Zeile", "Excel row"): [row.source_row for row in warnings],
-                    tr("Hinweis", "Issue"): [" · ".join(str(localize_value(issue)) for issue in row.issues) for row in warnings],
-                }
-            ),
-            hide_index=True,
-            width="stretch",
-        )
 
     st.subheader(tr("So werden die Zahlen berechnet", "How the figures are calculated"))
     methodology = tr(

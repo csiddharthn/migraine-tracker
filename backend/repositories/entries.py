@@ -6,7 +6,7 @@ from datetime import date
 from sqlalchemy import Select, select
 from sqlalchemy.orm import Session, selectinload
 
-from backend.models import DailyRecord, EntryTrigger, MedicationIntake, MigraineEntry, MigrationSourceRow, TriggerDefinition
+from backend.models import DailyRecord, EntryTrigger, MedicationIntake, MigraineEntry, TriggerDefinition
 
 
 class EntryRepository:
@@ -97,13 +97,3 @@ class EntryRepository:
         if active_only:
             statement = statement.where(TriggerDefinition.active.is_(True))
         return list(self.session.scalars(statement.order_by(TriggerDefinition.sort_order)))
-
-    def source_row(self, source_file: str, source_sheet: str, source_row: int) -> MigrationSourceRow | None:
-        return self.session.scalar(
-            select(MigrationSourceRow).where(
-                MigrationSourceRow.user_id == self.user_id,
-                MigrationSourceRow.source_file == source_file,
-                MigrationSourceRow.source_sheet == source_sheet,
-                MigrationSourceRow.source_row == source_row,
-            )
-        )

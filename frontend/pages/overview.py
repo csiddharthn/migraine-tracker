@@ -44,4 +44,4 @@ try:
         metrics[3].metric(tr("Kopfschmerztage mit Stärke 8 bis 10", "Headache days with intensity 8 to 10"), stats["intensity_8_to_10_days"])
 except Exception as exc:
     st.error(tr(f"Die PostgreSQL-Datenbank ist nicht erreichbar oder noch nicht eingerichtet: {exc}", f"The PostgreSQL database is unavailable or has not been set up yet: {exc}"))
-    st.info(tr("Bitte führen Sie die in der README beschriebenen Schritte für PostgreSQL, Alembic und den einmaligen Excel-Import aus.", "Follow the README steps for PostgreSQL, Alembic, and the one-time Excel import."))
+    st.info(tr("Bitte führen Sie die in der README beschriebenen Schritte für PostgreSQL und Alembic aus.", "Follow the README steps for PostgreSQL and Alembic."))
