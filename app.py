@@ -80,8 +80,8 @@ navigation = st.navigation(pages, position="hidden")
 with st.sidebar:
     st.segmented_control(
         "Sprache / Language",
-        options=list(LANGUAGE_LABELS),
-        format_func=LANGUAGE_LABELS.get,
+        options=list(cfg.LANGUAGE_LABELS),
+        format_func=cfg.LANGUAGE_LABELS.get,
         key="app_language",
         width="stretch",
     )
