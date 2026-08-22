@@ -20,7 +20,18 @@ def migrate():
         for row in rows:
             entry_id, notes_text = row
             parsed = parse_structured_notes(notes_text or "")
-            timeline_notes = format_structured_notes(parsed) if parsed.timeline else (notes_text or "")
+            timeline_lines = []
+            for row in parsed.timeline:
+                note = row.note.strip()
+                if row.start_time is not None and row.end_time is not None:
+                    timeline_lines.append(f"{row.start_time.strftime('%H:%M')}–{row.end_time.strftime('%H:%M')} Uhr: {note}")
+                elif row.start_time is not None:
+                    timeline_lines.append(f"{row.start_time.strftime('%H:%M')} Uhr: {note}")
+                else:
+                    timeline_lines.append(note)
+            if parsed.peak_start_minute is not None:
+                timeline_lines.append(f"Höhepunkt: {parsed.peak_start_minute // 60:02d}:{parsed.peak_start_minute % 60:02d} Uhr (Dauer: {parsed.peak_duration_minutes} Minuten)")
+            timeline_notes = "\n".join(timeline_lines) if timeline_lines else (notes_text or "")
             possible_factors = parsed.possible_factors
             symptoms_and_actions = parsed.symptoms_and_actions
             other_notes = ""
