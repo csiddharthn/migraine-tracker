@@ -21,6 +21,7 @@ from .entities import (
     MigrationSourceRow,
     NoteInterpretation,
     TriggerDefinition,
+    UserCredential,
     UserProfile,
 )
 
@@ -33,5 +34,6 @@ __all__ = [
     "MigrationSourceRow",
     "NoteInterpretation",
     "TriggerDefinition",
+    "UserCredential",
     "UserProfile",
 ]
