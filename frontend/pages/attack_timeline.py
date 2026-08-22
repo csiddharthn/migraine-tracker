@@ -1,19 +1,5 @@
 from __future__ import annotations
 
-"""Purpose: Attack timeline page showing daily headache timing.
-
-Usage: Displays timeline charts and onset summaries.
-
-Functions available:
-- None (page script)
-
-Classes available:
-- None
-
-Call hierarchy:
-- attack_timeline.py -> backend.analytics.calculations, frontend.components
-"""
-
 import streamlit as st
 
 from backend.analytics.calculations import monthly_summaries, onset_summary
@@ -32,7 +18,7 @@ with database_session() as session:
     data = filtered_dataset(session)
     months = monthly_summaries(data)
     month_keys = [item["key"] for item in months]
-    month_key = st.selectbox(tr(cfg, "Angezeigter Monat", "Month shown"), list(reversed(month_keys)), index=0, format_func=month_label)
+    month_key = st.selectbox(tr(cfg, "Angezeigter Monat", "Month shown"), list(reversed(month_keys)), index=0, format_func=lambda k: month_label(cfg, k))
     st.plotly_chart(attack_timeline(data, month_key), width="stretch", config=chart_config())
 
     st.subheader(tr(cfg, "Zu welcher Tageszeit begannen die Kopfschmerzen?", "At what time of day did the headaches begin?"))

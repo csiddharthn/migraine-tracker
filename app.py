@@ -1,24 +1,5 @@
 from __future__ import annotations
 
-"""Purpose: Main Streamlit entry point for the migraine tracker application.
-
-Usage: Launches the multi-page dashboard with navigation, user settings,
-report period filters, and database session management.
-
-Functions available:
-- None (script-level execution)
-
-Classes available:
-- None
-
-Call hierarchy:
-- app.py -> frontend.components.filters.render_report_period
-- app.py -> frontend.components.state.database_session
-- app.py -> frontend.components.users.render_user_settings
-- app.py -> frontend.config.name_space.cfg
-- app.py -> frontend.i18n.LANGUAGE_LABELS, tr
-"""
-
 from pathlib import Path
 
 import streamlit as st

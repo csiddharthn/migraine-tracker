@@ -1,19 +1,5 @@
 from __future__ import annotations
 
-"""Purpose: Medication page showing medication usage and effectiveness.
-
-Usage: Displays medication summaries and effectiveness charts.
-
-Functions available:
-- None (page script)
-
-Classes available:
-- None
-
-Call hierarchy:
-- medication.py -> backend.analytics.calculations, frontend.components
-"""
-
 from collections import Counter
 
 import streamlit as st

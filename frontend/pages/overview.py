@@ -1,19 +1,5 @@
 from __future__ import annotations
 
-"""Purpose: Overview page showing key statistics.
-
-Usage: Displays summary stats, charts, and observations.
-
-Functions available:
-- None (page script)
-
-Classes available:
-- None
-
-Call hierarchy:
-- overview.py -> backend.analytics.calculations, frontend.components
-"""
-
 import streamlit as st
 
 from backend.analytics.calculations import summary_stats

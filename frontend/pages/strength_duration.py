@@ -1,19 +1,5 @@
 from __future__ import annotations
 
-"""Purpose: Strength and duration page showing intensity metrics.
-
-Usage: Displays scatter plots, histograms, and correlation summaries.
-
-Functions available:
-- None (page script)
-
-Classes available:
-- None
-
-Call hierarchy:
-- strength_duration.py -> backend.analytics.calculations, frontend.components
-"""
-
 from datetime import date
 
 import streamlit as st

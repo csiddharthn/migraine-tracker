@@ -1,19 +1,5 @@
 from __future__ import annotations
 
-"""Purpose: Data quality page showing completeness metrics.
-
-Usage: Displays data quality charts and completeness rates.
-
-Functions available:
-- None (page script)
-
-Classes available:
-- None
-
-Call hierarchy:
-- data_quality.py -> backend.analytics.calculations, frontend.components
-"""
-
 import streamlit as st
 
 from backend.analytics.calculations import data_quality

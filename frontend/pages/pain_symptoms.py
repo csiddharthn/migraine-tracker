@@ -1,19 +1,5 @@
 from __future__ import annotations
 
-"""Purpose: Pain symptoms page showing laterality and symptoms.
-
-Usage: Displays charts for pain side, type, and associated symptoms.
-
-Functions available:
-- None (page script)
-
-Classes available:
-- None
-
-Call hierarchy:
-- pain_symptoms.py -> backend.analytics.calculations, frontend.components
-"""
-
 import streamlit as st
 
 from backend.analytics.calculations import laterality_summary, pain_type_summary, symptom_summary

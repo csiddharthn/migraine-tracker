@@ -1,19 +1,5 @@
 from __future__ import annotations
 
-"""Purpose: Database page for viewing stored data.
-
-Usage: Displays database tables and counts per user.
-
-Functions available:
-- _localized_cell
-
-Classes available:
-- None
-
-Call hierarchy:
-- database.py -> backend.services.database_explorer, frontend.components
-"""
-
 from datetime import date
 
 import pandas as pd
