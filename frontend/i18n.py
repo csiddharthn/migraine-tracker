@@ -48,7 +48,7 @@ def localize_value(cfg, value: Any, *, lang: str | None = None) -> Any:
         return other_symptom_label(value, lang=resolved_language)
     if value in cfg.CODE_LABELS:
         german, english = cfg.CODE_LABELS[value]
-        return tr(german, english, lang=resolved_language)
+        return tr(cfg, german, english, lang=resolved_language)
     next_day = re.match(r"^(\d{2}:\d{2}) \(nächster Tag\)$", value)
     if next_day:
         return tr(value, f"{next_day.group(1)} (next day)", lang=resolved_language)
@@ -121,7 +121,7 @@ def other_symptom_label(cfg, code: str, *, lang: str | None = None) -> str:
 
 def derived_laterality_label(cfg, code: str, *, lang: str | None = None) -> str:
     german, english = cfg.DERIVED_LATERALITY_LABELS.get(code, (code, code))
-    return tr(german, english, lang=lang)
+    return tr(cfg, german, english, lang=lang)
 
 
 def trigger_label(cfg, code: str, stored_label: str, *, lang: str | None = None) -> str:
