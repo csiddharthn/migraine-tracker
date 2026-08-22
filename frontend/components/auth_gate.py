@@ -10,6 +10,8 @@ import streamlit as st
 
 from backend.config.settings import get_settings
 from backend.database.session import create_session_factory
+from frontend.config.name_space import cfg
+from frontend.i18n import tr
 
 
 def render_auth_gate() -> bool:
@@ -18,6 +20,28 @@ def render_auth_gate() -> bool:
         return True
 
     st.title("Access Control")
+    with st.expander(tr(cfg, "Neues Konto erstellen", "Create new account"), expanded=False):
+        new_user = st.text_input(tr(cfg, "Benutzername", "Username"), key="new_username")
+        new_pass = st.text_input(tr(cfg, "Passwort", "Password"), type="password", key="new_password")
+        new_name = st.text_input(tr(cfg, "Name", "Name"), key="new_display_name")
+        if st.button(tr(cfg, "Konto erstellen", "Create account"), key="create_account_btn"):
+            try:
+                factory = create_session_factory(get_settings().database_url)
+                with factory() as session:
+                    from backend.services.auth_service import AuthService
+                    from backend.services.user_service import UserService
+                    auth_service = AuthService(session)
+                    user_service = UserService(session)
+                    if auth_service.repository.get_by_username(new_user):
+                        st.error(tr(cfg, "Benutzername existiert bereits.", "Username already exists."))
+                    else:
+                        profile = user_service.create(new_name or new_user, None)
+                        profile.role = "user"
+                        session.commit()
+                        auth_service.create_credentials(profile.id, new_user, new_pass)
+                        st.success(tr(cfg, "Konto erstellt. Bitte anmelden.", "Account created. Please log in."))
+            except Exception as exc:
+                st.error(str(exc))
     username = st.text_input("Username")
     password = st.text_input("Password", type="password")
     if st.button("Login"):
