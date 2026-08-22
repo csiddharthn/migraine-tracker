@@ -4,7 +4,6 @@ import json
 import uuid
 from dataclasses import dataclass
 from datetime import time
-from pathlib import Path
 from typing import Any, Callable
 
 from sqlalchemy.orm import Session
@@ -36,7 +35,6 @@ class DatabaseExplorerService:
         TableDescriptor("interpretations", "Automatisch ausgewertete Notizen", "note_interpretations", "Uhrzeiten, Schmerzseite und Begleitumstände, die im Notiztext erkannt und gegebenenfalls geprüft wurden.", True),
         TableDescriptor("trigger_assignments", "Ausgewählte Auslöser", "entry_triggers", "Die möglichen Auslöser, die bei den einzelnen Kopfschmerztagen ausgewählt wurden.", True),
         TableDescriptor("audit_logs", "Änderungsprotokoll", "entry_audit_log", "Erstellungen und Änderungen an Kopfschmerzeinträgen.", True),
-        TableDescriptor("migration_rows", "Übernahme aus Excel", "migration_source_rows", "Informationen zur einmaligen Übernahme der ursprünglichen Excel-Zeilen.", True),
         TableDescriptor("users", "Personen", "user_profiles", "In der Datenbank angelegte Personenprofile.", False),
         TableDescriptor("trigger_definitions", "Verfügbare Auslöser", "trigger_definitions", "Alle Auslöser, die im Eingabeformular ausgewählt werden können.", False),
     )
@@ -52,7 +50,6 @@ class DatabaseExplorerService:
             "interpretations": self._interpretations,
             "trigger_assignments": self._trigger_assignments,
             "audit_logs": self._audit_logs,
-            "migration_rows": self._migration_rows,
             "users": self._users,
             "trigger_definitions": self._trigger_definitions,
         }
@@ -224,33 +221,6 @@ class DatabaseExplorerService:
             for row, entry_date in self.repository.audit_logs()
         ]
         return DatabaseTable(self._descriptor("audit_logs"), rows, ("Protokoll-ID", "Eintrag-ID"))
-
-    def _migration_rows(self) -> DatabaseTable:
-        rows = [
-            {
-                "Person": self.user_display_name,
-                "Datum": row.record_date,
-                "Quelldatei": Path(row.source_file).name,
-                "Tabellenblatt": row.source_sheet,
-                "Quellzeile": row.source_row,
-                "Status": row.status,
-                "Hinweise": _join(row.issues),
-                "Importiert am": row.imported_at,
-                "Import-ID": str(row.id),
-                "Person-ID": str(row.user_id),
-                "Vollständiger Quellpfad": row.source_file,
-                "Rohdaten": _json(row.raw_payload),
-                "Inhaltshash": row.content_hash,
-                "Eintrag-ID": str(row.entry_id) if row.entry_id else None,
-                "Tagesdatensatz-ID": str(row.daily_record_id) if row.daily_record_id else None,
-            }
-            for row in self.repository.migration_rows()
-        ]
-        return DatabaseTable(
-            self._descriptor("migration_rows"),
-            rows,
-            ("Import-ID", "Person-ID", "Vollständiger Quellpfad", "Rohdaten", "Inhaltshash", "Eintrag-ID", "Tagesdatensatz-ID"),
-        )
 
     def _users(self) -> DatabaseTable:
         rows = [

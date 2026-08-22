@@ -33,11 +33,6 @@ recordings/
 *.ogg
 *.webm
 
-# Workbook-specific local reconciliation material
-docs/initial_assessment.md
-tests/test_current_workbook_reconciliation.py
-tests/test_analytics_reconciliation.py
-
 # Generated Windows artifacts
 Kopfschmerz-Tracker.exe
 Thumbs.db

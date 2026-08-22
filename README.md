@@ -4,11 +4,9 @@
 
 Mehrseitige Streamlit-Anwendung zur Erfassung und Auswertung von Kopfschmerz- und Migräneeinträgen. Die gesamte Oberfläche kann auf Deutsch oder Englisch verwendet werden; PostgreSQL ist die einzige Datenquelle im laufenden Betrieb.
 
-Die Excel-Arbeitsmappe wird ausschließlich durch den wiederholbar ausführbaren Einmalimport verwendet. Die laufende Anwendung liest oder schreibt weder Excel-Dateien noch Telegram-Daten.
-
 ## Datenschutz im Repository
 
-Dieses Repository enthält absichtlich keine Gesundheitsdaten, Namen importierter Personen, Excel-Arbeitsmappen, Datenbankdateien, Sicherungen, Migrationsberichte, Audioaufnahmen oder API-Schlüssel. Solche Dateien bleiben ausschließlich lokal und werden durch `.gitignore` ausgeschlossen. `.env.example` enthält nur Platzhalter.
+Dieses Repository enthält absichtlich keine Gesundheitsdaten, Personennamen, Quelldokumente, Datenbankdateien, Sicherungen, Audioaufnahmen oder API-Schlüssel. Solche Dateien bleiben ausschließlich lokal und werden durch `.gitignore` ausgeschlossen. `.env.example` enthält nur Platzhalter.
 
 ## Voraussetzungen
 
@@ -43,11 +41,10 @@ Alternativ kann `MIGRAINE_DATABASE_URL` in `.streamlit/secrets.toml` als Streaml
 Danach kann der gesamte Erstlauf mit einem Befehl ausgeführt werden:
 
 ```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\initial_setup.ps1 `
-  -User "Beispielperson"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\initial_setup.ps1
 ```
 
-Das Skript startet PostgreSQL, wartet auf die Datenbank, führt Alembic aus, importiert Excel idempotent und validiert den Abgleich. Die einzelnen Schritte sind nachfolgend weiterhin dokumentiert.
+Das Skript startet PostgreSQL, wartet auf die Datenbank und bringt das Schema mit Alembic auf den aktuellen Stand. Personen und Kopfschmerzeinträge werden anschließend direkt in der Anwendung angelegt.
 
 Die portable Datenbank lässt sich später separat starten und beenden:
 
@@ -66,34 +63,9 @@ Als optionale Alternative kann PostgreSQL mit `docker compose up -d` gestartet w
 .\.venv\Scripts\python.exe -m alembic upgrade head
 ```
 
-Alembic erstellt Tabellen mit Constraints und Indizes sowie Auslöserdefinitionen, getrennte Notizinterpretationen, Importprotokoll und Änderungsprotokoll.
+Alembic erstellt Tabellen mit Constraints und Indizes sowie Auslöserdefinitionen, getrennte Notizinterpretationen und ein Änderungsprotokoll.
 
-## 5. Excel einmalig importieren
-
-Der Import ist idempotent. Eine unveränderte Wiederholung erzeugt keine Duplikate. Eine geänderte Quellzeile aktualisiert nur einen ursprünglich aus Excel importierten Datensatz; ein Konflikt mit einem manuell erstellten Eintrag wird gemeldet und nicht überschrieben.
-
-```powershell
-.\.venv\Scripts\python.exe scripts\import_excel.py `
-  "..\Kopfschmerzkalender.xlsx" `
-  --user "Beispielperson" `
-  --report "artifacts\migration_report.json"
-```
-
-Der Bericht enthält die Anzahl importierter, aktualisierter, übersprungener, doppelter und abgelehnter Zeilen sowie Datenqualitäts-Hinweise und repräsentative Stichproben.
-
-## 6. Import validieren
-
-```powershell
-.\.venv\Scripts\python.exe scripts\validate_migration.py `
-  "..\Kopfschmerzkalender.xlsx" `
-  --user "Beispielperson"
-```
-
-Die Validierung prüft Attackenzahl, erfasste Kalendertage, vollständige Originalnotizen, Gesamtdauer und Monatswerte. Die allgemeine Feldzuordnung ist in `docs/data_mapping.md` dokumentiert. Workbook-spezifische Abgleichswerte und Tests bleiben lokal.
-
-Nach erfolgreicher Validierung wird Excel im normalen Betrieb nicht mehr verwendet und bleibt nur als Quellarchiv erhalten.
-
-## 7. Streamlit starten
+## 5. Streamlit starten
 
 ```powershell
 .\.venv\Scripts\python.exe -m streamlit run app.py
@@ -114,7 +86,7 @@ Die Detailseiten sind nach analytischer Fragestellung überschneidungsfrei gegli
 7. Medikamente und Behandlung: mehrere Einnahmen pro Kopfschmerztag, jeweilige Uhrzeit, Dosis, Wirkung und Behandlungszeiträume
 8. Einträge: Erfassung, Bearbeitung und Verwaltung möglicher Auslöser
 9. Gespeicherte Daten: schreibgeschützte Ansicht der gespeicherten Angaben
-10. Datenprüfung und Berechnung: Vollständigkeit, Herkunft, Definitionen und Grenzen
+10. Datenprüfung und Berechnung: Vollständigkeit, Definitionen und Grenzen
 
 Sprache, aktive Person und Auswertungszeitraum stehen oberhalb der Seitennavigation. Dort kann auch eine neue Person samt Beginn ihres Beobachtungszeitraums angelegt werden. Alle Formulare, Listen, Kennzahlen und Diagramme sind strikt auf diese Person begrenzt; zwei Personen dürfen daher auch am selben Datum jeweils einen eigenen Eintrag besitzen. Der Zeitraum ist der einzige globale Berichtsfilter. Stärke und Auslöser werden nicht global ausgeschlossen, damit die Berichte stets alle Migränefälle im gewählten Zeitraum berücksichtigen.
 
@@ -148,7 +120,7 @@ Das Werkzeug verwendet ausschließlich Groq. Im Eingabereiter kann das bevorzugt
 
 Der Gesundheitstext wird erst nach einer sichtbaren Einwilligung an die Groq-API gesendet. Die KI erstellt ausschließlich einen prüfpflichtigen Entwurf. Der ursprüngliche Eingabetext kann beim Speichern wahlweise getrennt vom erzeugten Notiztext in PostgreSQL aufbewahrt werden; Groq als Anbieter, das tatsächlich verwendete Modell, Promptversion, strukturierter Entwurf und Prüfzeitpunkt werden zur Nachvollziehbarkeit protokolliert.
 
-Der Bereich `Gespeicherte Daten` bietet einen schreibgeschützten Einblick in die vorhandenen Angaben. Personenbezogene Tabellen folgen der in der Seitenleiste ausgewählten Person; technische IDs und Importfelder können bei Bedarf eingeblendet werden.
+Der Bereich `Gespeicherte Daten` bietet einen schreibgeschützten Einblick in die vorhandenen Angaben. Personenbezogene Tabellen folgen der in der Seitenleiste ausgewählten Person; technische IDs und Referenzfelder können bei Bedarf eingeblendet werden.
 
 ## Sicherung
 
@@ -173,9 +145,9 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\restore_database
 .\.venv\Scripts\python.exe -m pytest
 ```
 
-Die Standardsuite verwendet eine isolierte SQLAlchemy-Datenbank und gleicht bei vorhandener Arbeitsmappe die echten Excel-Daten ab. PostgreSQL-Integrationstests verwenden die konfigurierte Variable `MIGRAINE_TEST_DATABASE_URL`. Visuelle Prüfungen benötigen eine laufende Testinstanz.
+Die Standardsuite verwendet eine isolierte SQLAlchemy-Datenbank. PostgreSQL-Integrationstests verwenden die konfigurierte Variable `MIGRAINE_TEST_DATABASE_URL`. Visuelle Prüfungen benötigen eine laufende Testinstanz.
 
-GitHub Actions führt die vollständige im Repository enthaltene Testsuite bei jedem Push und jedem Pull Request aus. Der Workflow startet dafür PostgreSQL 17, prüft die Alembic-Migrationen und lädt den Pytest-Bericht für 14 Tage als Workflow-Artefakt hoch. Workbook-spezifische lokale Abgleichstests und private Quelldaten sind nicht Bestandteil des Repositorys.
+GitHub Actions führt die vollständige im Repository enthaltene Testsuite bei jedem Push und jedem Pull Request aus. Der Workflow startet dafür PostgreSQL 17, prüft die Alembic-Migrationen und lädt den Pytest-Bericht für 14 Tage als Workflow-Artefakt hoch. Private Gesundheitsdaten sind nicht Bestandteil des Repositorys.
 
 ## Abhängigkeiten aktualisieren
 
@@ -203,9 +175,8 @@ Nach Änderungen am Datenmodell eine Alembic-Migration erstellen und prüfen; `B
 - `backend/analytics/`: deterministische Berechnungen für Seiten und Tests
 - `backend/note_interpretation/`: regelbasierte Extraktion von Uhrzeiten, Seite, Kontexten und Maßnahmen
 - `backend/ai_intake/`: strukturierte, prüfpflichtige KI-Entwürfe aus frei formulierten Beschreibungen
-- `backend/migration/`: einmaliger Excel-Leser und idempotenter Import
 - `migrations/`: Alembic-Schemahistorie
-- `scripts/`: Import, Validierung, Sicherung und Wiederherstellung
-- `docs/`: Bestandsaufnahme, Feldzuordnung, Datenqualität, Methodik und Architekturentscheidungen
+- `scripts/`: lokale Einrichtung, Start, Sicherung und Wiederherstellung
+- `docs/`: Methodik und Architekturentscheidungen
 
 Die Entscheidung gegen zusätzliche Bronze-, Silver- und Gold-Schichten ist in `docs/medallion_decision.md` dokumentiert. Fachliche Bezugspunkte stehen in `docs/methodology_references.md`.
