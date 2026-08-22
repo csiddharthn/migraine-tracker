@@ -23,9 +23,27 @@ def render_auth_gate() -> bool:
     if st.button("Login"):
         expected_user = settings.auth_username
         expected_pass = settings.auth_password.get_secret_value() if settings.auth_password else ""
+        # Check .env admin credentials OR database credentials
+        valid = False
+        is_admin_login = False
         if username == expected_user and password == expected_pass:
+            valid = True
+            is_admin_login = True
+        else:
+            try:
+                factory = create_session_factory(get_settings().database_url)
+                with factory() as session:
+                    from backend.services.auth_service import AuthService
+                    auth_service = AuthService(session)
+                    cred = auth_service.repository.get_by_username(username)
+                    if cred is not None and auth_service.verify_password(password, cred.password_hash):
+                        valid = True
+                        is_admin_login = False
+            except Exception:
+                pass
+        if valid:
             st.session_state["authenticated"] = True
-            st.session_state["is_admin"] = True
+            st.session_state["is_admin"] = is_admin_login
             st.session_state["user_credential_username"] = username
             # Ensure admin profile and credential exist
             try:
