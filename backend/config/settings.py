@@ -34,6 +34,8 @@ class Settings(BaseSettings):
     log_level: str = Field(default="INFO", alias="MIGRAINE_LOG_LEVEL")
     groq_api_key: SecretStr | None = Field(default=None, alias="GROQ_API_KEY")
     openrouter_api_key: SecretStr | None = Field(default=None, alias="OPENROUTER_API_KEY")
+    auth_username: str = Field(default="admin", alias="AUTH_USERNAME")
+    auth_password: SecretStr = Field(default=SecretStr("migraine"), alias="AUTH_PASSWORD")
     config_path: Path = PROJECT_ROOT / "backend" / "config" / "app.yaml"
 
     model_config = SettingsConfigDict(

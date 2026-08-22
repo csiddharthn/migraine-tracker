@@ -4,6 +4,7 @@ from pathlib import Path
 
 import streamlit as st
 
+from frontend.components.auth_gate import render_auth_gate
 from frontend.components.filters import render_report_period
 from frontend.components.state import database_session
 from frontend.components.users import render_user_settings
@@ -22,6 +23,8 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="auto",
 )
+
+render_auth_gate()
 
 page_sections = [
     (
