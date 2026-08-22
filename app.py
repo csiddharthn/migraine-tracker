@@ -27,12 +27,12 @@ from frontend.components.filters import render_report_period
 from frontend.components.state import database_session
 from frontend.components.users import render_user_settings
 from frontend.config.name_space import cfg
-from frontend.i18n import LANGUAGE_LABELS, tr
+from frontend.i18n import tr
 
 
 ROOT = Path(__file__).resolve().parent
 ICON = ROOT / "assets" / "migraine_headache_icon.png"
-if st.session_state.get("app_language") not in LANGUAGE_LABELS:
+if st.session_state.get("app_language") not in cfg.LANGUAGE_LABELS:
     st.session_state["app_language"] = "de"
 
 st.set_page_config(
