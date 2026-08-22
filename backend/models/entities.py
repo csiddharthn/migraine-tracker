@@ -64,6 +64,27 @@ class UserProfile(TimestampMixin, Base):
     name_key: Mapped[str] = mapped_column(String(180), nullable=False, unique=True)
     tracking_start_date: Mapped[date] = mapped_column(Date, nullable=False)
     active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    role: Mapped[str] = mapped_column(String(20), default="user", nullable=False)
+
+
+class UserCredential(TimestampMixin, Base):
+    __tablename__ = "user_credentials"
+    __table_args__ = (
+        UniqueConstraint("username", name="uq_user_credentials_username"),
+        UniqueConstraint("user_id", name="uq_user_credentials_user_id"),
+        Index("ix_user_credentials_username", "username"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        ForeignKey("user_profiles.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    username: Mapped[str] = mapped_column(String(80), nullable=False)
+    password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
+
+    user: Mapped[UserProfile] = relationship()
 
 
 class MigraineEntry(TimestampMixin, Base):

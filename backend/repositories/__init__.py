@@ -12,9 +12,10 @@ Call hierarchy:
 - __init__.py -> .database_explorer, .entries, .triggers, .users
 """
 
+from .credentials import CredentialRepository
 from .database_explorer import DatabaseExplorerRepository
 from .entries import EntryRepository
 from .triggers import TriggerRepository
 from .users import UserRepository
 
-__all__ = ["DatabaseExplorerRepository", "EntryRepository", "TriggerRepository", "UserRepository"]
+__all__ = ["CredentialRepository", "DatabaseExplorerRepository", "EntryRepository", "TriggerRepository", "UserRepository"]

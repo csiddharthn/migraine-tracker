@@ -47,6 +47,7 @@ class UserService:
             name_key=name_key,
             tracking_start_date=tracking_start_date or date.today(),
             active=True,
+            role="user",
         )
         self.session.add(profile)
         self.session.flush()
