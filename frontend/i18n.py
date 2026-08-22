@@ -100,7 +100,7 @@ def column_label(cfg, value: str, *, lang: str | None = None) -> str:
 
 def localize_items(cfg, items: list[dict[str, Any]], *, lang: str | None = None) -> list[dict[str, Any]]:
     return [
-        {**item, "label": localize_value(item.get("label"), lang=lang)}
+        {**item, "label": localize_value(cfg, item.get("label"), lang=lang)}
         for item in items
     ]
 
