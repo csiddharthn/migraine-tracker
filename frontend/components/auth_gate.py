@@ -20,7 +20,7 @@ def render_auth_gate() -> bool:
         return True
 
     st.title("Access Control")
-    with st.expander(tr(cfg, "Neues Konto erstellen", "Create new account"), expanded=False):
+    with st.expander(tr(cfg, "Neues Konto erstellen", "Create new account"), expanded=True):
         new_user = st.text_input(tr(cfg, "Benutzername", "Username"), key="new_username")
         new_pass = st.text_input(tr(cfg, "Passwort", "Password"), type="password", key="new_password")
         new_name = st.text_input(tr(cfg, "Name", "Name"), key="new_display_name")
