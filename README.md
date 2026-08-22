@@ -1,5 +1,7 @@
 # Kopfschmerz-Tracker
 
+[![Tests](https://github.com/csiddharthn/migraine-tracker/actions/workflows/tests.yml/badge.svg)](https://github.com/csiddharthn/migraine-tracker/actions/workflows/tests.yml)
+
 Mehrseitige Streamlit-Anwendung zur Erfassung und Auswertung von Kopfschmerz- und Migräneeinträgen. Die gesamte Oberfläche kann auf Deutsch oder Englisch verwendet werden; PostgreSQL ist die einzige Datenquelle im laufenden Betrieb.
 
 Die Excel-Arbeitsmappe wird ausschließlich durch den wiederholbar ausführbaren Einmalimport verwendet. Die laufende Anwendung liest oder schreibt weder Excel-Dateien noch Telegram-Daten.
@@ -172,6 +174,8 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\restore_database
 ```
 
 Die Standardsuite verwendet eine isolierte SQLAlchemy-Datenbank und gleicht bei vorhandener Arbeitsmappe die echten Excel-Daten ab. PostgreSQL-Integrationstests verwenden die konfigurierte Variable `MIGRAINE_TEST_DATABASE_URL`. Visuelle Prüfungen benötigen eine laufende Testinstanz.
+
+GitHub Actions führt die vollständige im Repository enthaltene Testsuite bei jedem Push und jedem Pull Request aus. Der Workflow startet dafür PostgreSQL 17, prüft die Alembic-Migrationen und lädt den Pytest-Bericht für 14 Tage als Workflow-Artefakt hoch. Workbook-spezifische lokale Abgleichstests und private Quelldaten sind nicht Bestandteil des Repositorys.
 
 ## Abhängigkeiten aktualisieren
 
