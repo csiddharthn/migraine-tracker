@@ -111,7 +111,7 @@ def yes_no(cfg, value: bool, *, lang: str | None = None) -> str:
 
 def aura_label(cfg, code: str, *, lang: str | None = None) -> str:
     german, english = cfg.AURA_LABELS.get(code, (code, code))
-    return tr(german, english, lang=lang)
+    return tr(cfg, german, english, lang=lang)
 
 
 def other_symptom_label(cfg, code: str, *, lang: str | None = None) -> str:
