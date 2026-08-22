@@ -36,12 +36,12 @@ ai_intake:
   prompt_version: "1.2"
   timeout_seconds: 90
   openrouter_models:
-    - id: "openrouter/anthropic/claude-3.5-sonnet"
-      label_de: "Claude 3.5 Sonnet (OpenRouter)"
-      label_en: "Claude 3.5 Sonnet (OpenRouter)"
-    - id: "openrouter/openai/gpt-4o"
-      label_de: "GPT-4o (OpenRouter)"
-      label_en: "GPT-4o (OpenRouter)"
+    - id: "openai/gpt-oss-120b"
+      label_de: "GPT-OSS 120B (leistungsstärker, kostenlos)"
+      label_en: "GPT-OSS 120B (more capable, free)"
+    - id: "openai/gpt-oss-20b"
+      label_de: "GPT-OSS 20B (schnelleres Ersatzmodell, kostenlos)"
+      label_en: "GPT-OSS 20B (faster fallback, free)"
   transcription:
     enabled: true
     default_model: "whisper-large-v3"

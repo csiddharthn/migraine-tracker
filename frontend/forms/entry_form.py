@@ -76,7 +76,7 @@ def render_entry_form(
         note_defaults = draft.structured_notes()
     else:
         note_defaults = parse_structured_notes(
-            existing.notes if existing else "",
+            existing.timeline_notes if existing else "",
             peak_start_minute=existing_interpretation.peak_start_minute if existing_interpretation else None,
             peak_end_minute=existing_interpretation.peak_end_minute if existing_interpretation else None,
         )
@@ -299,13 +299,18 @@ def render_entry_form(
 
         possible_factors = st.text_area(
             tr(cfg, "Mögliche Einflussfaktoren", "Possible contributing factors"),
-            value=note_defaults.possible_factors,
+            value=existing.possible_factors if existing else note_defaults.possible_factors,
             height=120,
         )
         symptoms_and_actions = st.text_area(
             tr(cfg, "Beschwerden und Maßnahmen", "Symptoms and actions"),
-            value=note_defaults.symptoms_and_actions,
+            value=existing.symptoms_and_actions if existing else note_defaults.symptoms_and_actions,
             height=150,
+        )
+        other_notes = st.text_area(
+            tr(cfg, "Andere Notizen", "Other notes"),
+            value=existing.other_notes if existing else "",
+            height=100,
         )
         submitted = st.form_submit_button(tr(cfg, "Eintrag speichern", "Save entry"), type="primary", width="stretch")
 
@@ -358,8 +363,13 @@ def render_entry_form(
         possible_factors=possible_factors.strip(),
         symptoms_and_actions=symptoms_and_actions.strip(),
     )
-    note_fields_changed = existing is None or structured_notes != note_defaults
-    notes = format_structured_notes(structured_notes) if note_fields_changed else existing.notes
+    note_fields_changed = existing is None or (
+        structured_notes.timeline != (parse_structured_notes(existing.timeline_notes or "").timeline if existing else ())
+        or structured_notes.possible_factors != (existing.possible_factors or "")
+        or structured_notes.symptoms_and_actions != (existing.symptoms_and_actions or "")
+        or other_notes.strip() != (existing.other_notes or "")
+    )
+    timeline_notes_text = format_structured_notes(structured_notes) if note_fields_changed else (existing.timeline_notes if existing else "")
     note_annotation = None
     if note_fields_changed and peak_start_minute is not None:
         note_annotation = {
@@ -384,7 +394,10 @@ def render_entry_form(
             osmophobia=symptom_values["osmophobia"],
             other_symptom_codes=symptom_values["other_symptom_codes"],
             medications=medications,
-            notes=notes,
+            timeline_notes=timeline_notes_text,
+            possible_factors=possible_factors.strip(),
+            symptoms_and_actions=symptoms_and_actions.strip(),
+            other_notes=other_notes.strip(),
             note_annotation=note_annotation,
             aimovig_injection=aimovig,
             momeallerg_nasal_spray=momeallerg,

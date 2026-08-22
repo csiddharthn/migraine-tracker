@@ -45,7 +45,10 @@ def payload() -> EntryInput:
         pain_type=PAIN_TYPE,
         entered_laterality=LATERALITY,
         medications=[MedicationInput(name=MEDICATION_NAME, taken_at=MEDICATION_TIME)],
-        notes=NOTES,
+        timeline_notes=NOTES,
+        possible_factors="",
+        symptoms_and_actions="",
+        other_notes="",
         momeallerg_nasal_spray=MOMEALLERG_NASAL_SPRAY,
     )
 

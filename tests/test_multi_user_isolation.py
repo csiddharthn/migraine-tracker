@@ -45,8 +45,8 @@ def test_same_date_is_allowed_for_different_users_and_analytics_are_isolated(ses
         "trigger_codes": [TRIGGER_CODE],
         "duration_hours": DURATION_HOURS,
     }
-    EntryService(session, anna.id).create(EntryInput(**common, strength=ANNA_STRENGTH, notes=ANNA_NOTES))
-    EntryService(session, ben.id).create(EntryInput(**common, strength=BEN_STRENGTH, notes=BEN_NOTES))
+    EntryService(session, anna.id).create(EntryInput(**common, strength=ANNA_STRENGTH, timeline_notes=ANNA_NOTES, possible_factors="", symptoms_and_actions="", other_notes=""))
+    EntryService(session, ben.id).create(EntryInput(**common, strength=BEN_STRENGTH, timeline_notes=BEN_NOTES, possible_factors="", symptoms_and_actions="", other_notes=""))
     session.commit()
 
     anna_data = AnalyticsService(session, anna).dataset(end_date=ENTRY_DATE)

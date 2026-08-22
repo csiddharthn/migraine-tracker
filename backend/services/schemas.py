@@ -58,7 +58,10 @@ class EntryInput(BaseModel):
     osmophobia: bool = False
     other_symptom_codes: list[str] = Field(default_factory=list)
     medications: list[MedicationInput] = Field(default_factory=list)
-    notes: str = ""
+    timeline_notes: str = ""
+    possible_factors: str = ""
+    symptoms_and_actions: str = ""
+    other_notes: str = ""
     note_annotation: dict[str, Any] | None = Field(default=None, exclude=True)
     aimovig_injection: bool = False
     momeallerg_nasal_spray: bool = False
@@ -105,7 +108,10 @@ class EntryPatch(BaseModel):
     osmophobia: bool | None = None
     other_symptom_codes: list[str] | None = None
     medications: list[MedicationInput] | None = None
-    notes: str | None = None
+    timeline_notes: str | None = None
+    possible_factors: str | None = None
+    symptoms_and_actions: str | None = None
+    other_notes: str | None = None
     aimovig_injection: bool | None = None
     momeallerg_nasal_spray: bool | None = None
     amitriptyline_neuraxpharm: bool | None = None

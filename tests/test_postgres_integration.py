@@ -79,7 +79,10 @@ def test_postgres_create_and_update_in_isolated_schema() -> None:
                     strength=TEST_STRENGTH,
                     duration_hours=TEST_DURATION,
                     medications=TEST_MEDICATIONS,
-                    notes=TEST_NOTES,
+                    timeline_notes=TEST_NOTES,
+                    possible_factors="",
+                    symptoms_and_actions="",
+                    other_notes="",
                 )
             )
             entry_id = entry.id

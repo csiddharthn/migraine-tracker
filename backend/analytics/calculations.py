@@ -308,7 +308,7 @@ def data_quality(data: AnalyticsDataset) -> dict[str, Any]:
     medication_days = [entry for entry in data.entries if entry.medications]
     return {
         "total": total,
-        "notes": sum(bool(entry.notes) for entry in data.entries),
+        "notes": sum(bool(entry.timeline_notes or entry.possible_factors or entry.symptoms_and_actions or entry.other_notes) for entry in data.entries),
         "onset": sum(bool(entry.interpretation and entry.interpretation.onset_minute is not None) for entry in data.entries),
         "peak": sum(bool(entry.interpretation and entry.interpretation.peak_start_minute is not None) for entry in data.entries),
         "end": sum(bool(entry.interpretation and entry.interpretation.end_minute is not None) for entry in data.entries),

@@ -72,7 +72,10 @@ class AIIntakeService:
         if not self.models:
             raise AIIntakeError("Für die KI-Auswertung ist kein Groq-Modell konfiguriert.")
         self.provider_name = provider_name or "groq"
-        self.provider: AIProvider = self._build_provider(provider_name, api_key, timeout_seconds)
+        if client_factory is not None:
+            self.provider: AIProvider = None  # type: ignore[assignment]
+        else:
+            self.provider: AIProvider = self._build_provider(provider_name, api_key, timeout_seconds)
         self.prompt_version = prompt_version
         self.timeout_seconds = timeout_seconds
         self.model_used: str | None = None

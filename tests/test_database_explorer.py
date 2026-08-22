@@ -51,7 +51,10 @@ def test_database_explorer_scopes_personal_tables(session, user) -> None:
             strength=user_strength,
             duration_hours=user_duration,
             medications=[MedicationInput(name=MEDICATION_NAME, taken_at=MEDICATION_TIME)],
-            notes=NOTES_PRIMARY,
+            timeline_notes=NOTES_PRIMARY,
+            possible_factors="",
+            symptoms_and_actions="",
+            other_notes="",
         )
     )
     EntryService(session, second_user.id).create(

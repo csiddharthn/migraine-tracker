@@ -49,7 +49,10 @@ class EntryService:
         "photophobia",
         "osmophobia",
         "other_symptom_codes",
-        "notes",
+        "timeline_notes",
+        "possible_factors",
+        "symptoms_and_actions",
+        "other_notes",
         "source_narrative",
         "ai_provider",
         "ai_model",
@@ -130,7 +133,9 @@ class EntryService:
             if field in self.ENTRY_FIELDS and (value is not None or field in nullable_fields):
                 setattr(entry, field, value)
 
-        notes_changed = "notes" in changes or "entered_laterality" in changes
+        notes_changed = any(
+            field in changes for field in ("timeline_notes", "possible_factors", "symptoms_and_actions", "other_notes", "entered_laterality")
+        )
         if notes_changed:
             self._set_interpretation(
                 entry,
@@ -185,7 +190,7 @@ class EntryService:
         reviewed_annotation: dict[str, Any] | None = None,
         preserve_review: bool = False,
     ) -> None:
-        automatic_result = self.interpreter.interpret(entry.notes, entry.entered_laterality)
+        automatic_result = self.interpreter.interpret(entry.timeline_notes, entry.entered_laterality)
         automatic_snapshot = automatic_result.to_payload()
         result = automatic_result
         if reviewed_annotation is not None:

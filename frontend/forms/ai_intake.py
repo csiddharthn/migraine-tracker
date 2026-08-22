@@ -58,7 +58,15 @@ def render_ai_intake(
         key=f"ai_provider_{user_id}",
     )
     active_api_key = openrouter_key if selected_provider == "openrouter" else api_key
-    model_options = _configured_models(ai_config)
+    if selected_provider == "openrouter":
+        model_options = _configured_model_list({"models": ai_config.get("openrouter_models", [])})
+        if not model_options:
+            model_options = [
+                {"id": "openai/gpt-oss-120b", "label_de": "GPT-OSS 120B (leistungsstärker)", "label_en": "GPT-OSS 120B (more capable)"},
+                {"id": "openai/gpt-oss-20b", "label_de": "GPT-OSS 20B (schnelleres Ersatzmodell)", "label_en": "GPT-OSS 20B (faster fallback)"},
+            ]
+    else:
+        model_options = _configured_models(ai_config)
     model_ids = [item["id"] for item in model_options]
     transcription_options = _configured_transcription_models(transcription_config)
     transcription_model_ids = [item["id"] for item in transcription_options]
