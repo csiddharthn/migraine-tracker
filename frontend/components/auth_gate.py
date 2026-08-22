@@ -20,10 +20,9 @@ def render_auth_gate() -> bool:
         return True
 
     st.title("Access Control")
-    with st.expander(tr(cfg, "Neues Konto erstellen", "Create new account"), expanded=True):
+    with st.expander(tr(cfg, "Neues Konto erstellen", "Create new account"), expanded=False):
         new_user = st.text_input(tr(cfg, "Benutzername", "Username"), key="new_username")
         new_pass = st.text_input(tr(cfg, "Passwort", "Password"), type="password", key="new_password")
-        new_name = st.text_input(tr(cfg, "Name", "Name"), key="new_display_name")
         if st.button(tr(cfg, "Konto erstellen", "Create account"), key="create_account_btn"):
             try:
                 factory = create_session_factory(get_settings().database_url)
@@ -35,7 +34,7 @@ def render_auth_gate() -> bool:
                     if auth_service.repository.get_by_username(new_user):
                         st.error(tr(cfg, "Benutzername existiert bereits.", "Username already exists."))
                     else:
-                        profile = user_service.create(new_name or new_user, None)
+                        profile = user_service.create(new_user, None)
                         profile.role = "user"
                         session.commit()
                         auth_service.create_credentials(profile.id, new_user, new_pass)
