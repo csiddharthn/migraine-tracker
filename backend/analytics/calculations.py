@@ -10,15 +10,10 @@ from typing import Any, Callable, Iterable
 from backend.models import DailyRecord, MigraineEntry
 
 
-WEEKDAYS = ("Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag")
-LATERALITY_LABELS = {
-    "rechts": "Rechts",
-    "links": "Links",
-    "beidseitig": "Beidseitig",
-    "beidseitig_linksbetont": "Beidseitig, linksbetont",
-    "einseitig_unbekannt": "Einseitig, Seite offen",
-    "unbekannt": "Nicht dokumentiert",
-}
+from backend.config import name_space
+
+WEEKDAYS = name_space.WEEKDAYS
+LATERALITY_LABELS = name_space.LATERALITY_LABELS
 
 
 @dataclass(frozen=True)
