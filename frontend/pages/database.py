@@ -52,7 +52,7 @@ with database_session() as session:
     if not show_technical and not frame.empty:
         frame = frame.drop(columns=list(table.technical_columns), errors="ignore")
     if not frame.empty:
-        frame = frame.map(_localized_cell).rename(columns=column_label)
+        frame = frame.map(_localized_cell).rename(columns=lambda col: column_label(cfg, col))
     if search and not frame.empty:
         matches = frame.fillna("").astype(str).apply(
             lambda column: column.str.contains(search, case=False, regex=False)
