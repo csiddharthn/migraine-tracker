@@ -13,13 +13,13 @@ if (-not (Test-Path -LiteralPath $envFile)) {
 Push-Location $projectRoot
 try {
   if (Test-Path -LiteralPath (Join-Path $projectRoot ".runtime\pgsql\bin\postgres.exe")) {
-    & (Join-Path $PSScriptRoot "start_postgres.ps1")
+    & (Join-Path $PSScriptRoot "..\database\scripts\start_postgres.ps1")
   } elseif (Get-Command docker -ErrorAction SilentlyContinue) {
     Write-Host "PostgreSQL wird über Docker gestartet ..."
     docker compose up -d
     if ($LASTEXITCODE -ne 0) { throw "PostgreSQL konnte nicht gestartet werden." }
   } else {
-    throw "Weder die lokale PostgreSQL-Laufzeit noch Docker wurde gefunden. Bitte scripts\install_portable_postgres.ps1 ausführen."
+    throw "Weder die lokale PostgreSQL-Laufzeit noch Docker wurde gefunden. Bitte backend/database/scripts/install_portable_postgres.ps1 ausführen."
   }
 
   & $python -m alembic upgrade head

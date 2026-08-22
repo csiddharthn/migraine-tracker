@@ -6,7 +6,7 @@ $ErrorActionPreference = "Stop"
 
 $projectRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..")).Path
 $python = Join-Path $projectRoot ".venv\Scripts\python.exe"
-$startPostgres = Join-Path $PSScriptRoot "start_postgres.ps1"
+$startPostgres = Join-Path $PSScriptRoot "..\database\scripts\start_postgres.ps1"
 $logDirectory = Join-Path $projectRoot ".runtime\logs"
 $appUrl = "http://127.0.0.1:8501"
 

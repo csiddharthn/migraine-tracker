@@ -7,7 +7,7 @@ $pgCtl = Join-Path $bin "pg_ctl.exe"
 $pgIsReady = Join-Path $bin "pg_isready.exe"
 
 if (-not (Test-Path -LiteralPath $pgCtl)) {
-  throw "Die lokale PostgreSQL-Laufzeit fehlt. Bitte zuerst scripts\install_portable_postgres.ps1 ausführen."
+  throw "Die lokale PostgreSQL-Laufzeit fehlt. Bitte zuerst backend/database/scripts/install_portable_postgres.ps1 ausführen."
 }
 if (-not (Test-Path -LiteralPath (Join-Path $data "PG_VERSION"))) {
   throw "Der lokale PostgreSQL-Datenordner ist nicht initialisiert."
