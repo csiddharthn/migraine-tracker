@@ -69,6 +69,10 @@ with st.sidebar:
         key="app_language",
         width="stretch",
     )
+    if st.session_state.get("authenticated"):
+        if st.button(tr(cfg, "Abmelden", "Logout"), use_container_width=True):
+            st.session_state.clear()
+            st.rerun()
 
 try:
     with database_session() as session:
