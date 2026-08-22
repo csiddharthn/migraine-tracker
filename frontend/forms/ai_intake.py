@@ -94,7 +94,7 @@ def render_ai_intake(
             icon=":material/key:",
         )
 
-    configured_default = str(cfg, ai_config.get("default_model", model_ids[0]))
+    configured_default = str(ai_config.get("default_model", model_ids[0]))
     default_index = model_ids.index(configured_default) if configured_default in model_ids else 0
     preferred_model = st.selectbox(
         tr(cfg, "Bevorzugtes KI-Modell", "Preferred AI model"),
@@ -128,7 +128,7 @@ def render_ai_intake(
 
     if transcription_config.get("enabled", True):
         st.markdown(f"**{tr(cfg, 'Spracheingabe', 'Voice input')}**")
-        transcription_default = str(cfg, 
+        transcription_default = str(
             transcription_config.get("default_model", transcription_model_ids[0])
         )
         transcription_default_index = (
@@ -187,7 +187,7 @@ def render_ai_intake(
                         filename=getattr(cfg, recording, "name", "migraine-description.wav"),
                         language=None if spoken_language == "auto" else spoken_language,
                     )
-                    existing_narrative = str(cfg, st.session_state.get(narrative_key, "")).strip()
+                    existing_narrative = str(st.session_state.get(narrative_key, "")).strip()
                     st.session_state[narrative_key] = (
                         f"{existing_narrative}\n\n{transcript}".strip() if existing_narrative else transcript
                     )
@@ -203,7 +203,7 @@ def render_ai_intake(
 
         transcription_metadata = st.session_state.get(transcription_metadata_key, {})
         if transcription_metadata:
-            voice_model_used = str(cfg, transcription_metadata.get("model", preferred_transcription_model))
+            voice_model_used = str(transcription_metadata.get("model", preferred_transcription_model))
             if voice_model_used != preferred_transcription_model:
                 st.info(
                     tr(cfg, 
@@ -279,7 +279,7 @@ def render_ai_intake(
             "All recognised information appears in the normal fields below. Correct errors or unclear default values before saving.",
         )
     )
-    model_used = str(cfg, metadata.get("model", preferred_model))
+    model_used = str(metadata.get("model", preferred_model))
     attempted_models = list(metadata.get("attempted_models", [model_used]))
     if model_used != preferred_model:
         st.info(
@@ -379,7 +379,7 @@ def render_ai_intake(
             "source_narrative": source_narrative,
             "ai_provider": selected_provider,
             "ai_model": model_used,
-            "ai_prompt_version": str(cfg, ai_config.get("prompt_version", "1.2")),
+            "ai_prompt_version": str(ai_config.get("prompt_version", "1.2")),
             "ai_extraction": ai_extraction,
         }
     )
@@ -418,7 +418,7 @@ def _extract_ai_draft(
         provider_name=provider_name or ai_config.get("provider", "groq"),
         api_key=api_key,
         models=_ordered_models(preferred_model, model_ids),
-        prompt_version=str(cfg, ai_config.get("prompt_version", "1.2")),
+        prompt_version=str(ai_config.get("prompt_version", "1.2")),
         timeout_seconds=int(ai_config.get("timeout_seconds", 90)),
     )
     with st.spinner(tr(cfg, "Der Text wird strukturiert ...", "Structuring the text ...")):
@@ -437,13 +437,13 @@ def _configured_models(ai_config: dict) -> list[dict[str, str]]:
     for item in ai_config.get("models", []):
         if isinstance(item, str) and item.strip():
             configured.append({"id": item.strip(), "label_de": item.strip(), "label_en": item.strip()})
-        elif isinstance(item, dict) and str(cfg, item.get("id", "")).strip():
-            model_id = str(cfg, item["id"]).strip()
+        elif isinstance(item, dict) and str(item.get("id", "")).strip():
+            model_id = str(item["id"]).strip()
             configured.append(
                 {
                     "id": model_id,
-                    "label_de": str(cfg, item.get("label_de", model_id)),
-                    "label_en": str(cfg, item.get("label_en", model_id)),
+                    "label_de": str(item.get("label_de", model_id)),
+                    "label_en": str(item.get("label_en", model_id)),
                 }
             )
     if configured:
@@ -485,13 +485,13 @@ def _configured_model_list(config: dict) -> list[dict[str, str]]:
     for item in config.get("models", []):
         if isinstance(item, str) and item.strip():
             configured.append({"id": item.strip(), "label_de": item.strip(), "label_en": item.strip()})
-        elif isinstance(item, dict) and str(cfg, item.get("id", "")).strip():
-            model_id = str(cfg, item["id"]).strip()
+        elif isinstance(item, dict) and str(item.get("id", "")).strip():
+            model_id = str(item["id"]).strip()
             configured.append(
                 {
                     "id": model_id,
-                    "label_de": str(cfg, item.get("label_de", model_id)),
-                    "label_en": str(cfg, item.get("label_en", model_id)),
+                    "label_de": str(item.get("label_de", model_id)),
+                    "label_en": str(item.get("label_en", model_id)),
                 }
             )
     return configured

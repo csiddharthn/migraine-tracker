@@ -373,7 +373,7 @@ def render_entry_form(
             entry_date=entry_date,
             trigger_codes=selected_trigger_codes,
             strength=strength,
-            duration_hours=Decimal(str(cfg, duration)),
+            duration_hours=Decimal(str(duration)),
             pain_type=pain_type,
             entered_laterality=laterality,
             aura_codes=symptom_values["aura_codes"],
@@ -393,7 +393,7 @@ def render_entry_form(
     except ValidationError as exc:
         messages = []
         for error in exc.errors():
-            field_key = ".".join(str(cfg, part) for part in error["loc"])
+            field_key = ".".join(str(part) for part in error["loc"])
             field = {
                 "trigger_codes": tr(cfg, "Auslöser", "Triggers"),
                 "strength": tr(cfg, "Stärke", "Intensity"),
@@ -421,9 +421,9 @@ def render_interpretation_review(entry: MigraineEntry) -> dict[str, Any] | None:
         end = _minute_control(tr(cfg, "Ende", "End"), interpretation.end_minute, "end")
         laterality = st.selectbox(tr(cfg, "Automatisch erkannte Schmerzseite", "Automatically recognised side of pain"), DERIVED_LATERALITIES, index=_choice_index(DERIVED_LATERALITIES, interpretation.laterality), format_func=derived_laterality_label)
         side_detail = st.text_input(tr(cfg, "Genauere Angabe zur Schmerzseite", "More detail about the side of pain"), value=localize_value(cfg, interpretation.side_detail or ""))
-        contexts = st.text_area(tr(cfg, "Erkannte Begleitumstände (eine Angabe pro Zeile)", "Recognised circumstances (one item per line)"), value="\n".join(str(cfg, localize_value(cfg, value)) for value in interpretation.contexts), height=110)
-        symptoms = st.text_area(tr(cfg, "Erkannte Symptome (eine Angabe pro Zeile)", "Recognised symptoms (one item per line)"), value="\n".join(str(cfg, localize_value(cfg, value)) for value in interpretation.symptoms), height=90)
-        interventions = st.text_area(tr(cfg, "Erkannte Maßnahmen (eine Angabe pro Zeile)", "Recognised interventions (one item per line)"), value="\n".join(str(cfg, localize_value(cfg, value)) for value in interpretation.interventions), height=90)
+        contexts = st.text_area(tr(cfg, "Erkannte Begleitumstände (eine Angabe pro Zeile)", "Recognised circumstances (one item per line)"), value="\n".join(str(localize_value(cfg, value)) for value in interpretation.contexts), height=110)
+        symptoms = st.text_area(tr(cfg, "Erkannte Symptome (eine Angabe pro Zeile)", "Recognised symptoms (one item per line)"), value="\n".join(str(localize_value(cfg, value)) for value in interpretation.symptoms), height=90)
+        interventions = st.text_area(tr(cfg, "Erkannte Maßnahmen (eine Angabe pro Zeile)", "Recognised interventions (one item per line)"), value="\n".join(str(localize_value(cfg, value)) for value in interpretation.interventions), height=90)
         submitted = st.form_submit_button(tr(cfg, "Korrigierte Angaben speichern", "Save corrected information"), type="primary")
     if not submitted:
         return None
