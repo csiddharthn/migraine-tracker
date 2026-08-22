@@ -1,0 +1,111 @@
+from __future__ import annotations
+
+from collections import Counter
+
+import pandas as pd
+import streamlit as st
+from sqlalchemy import select
+
+from backend.analytics.calculations import data_quality
+from backend.models import MigrationSourceRow
+from frontend.components.charts import completeness_chart
+from frontend.components.state import database_session
+from frontend.components.ui import apply_ui, chart_config, format_date, page_header
+from frontend.components.users import selected_user
+from frontend.i18n import localize_value, tr
+from frontend.pages.page_utils import filtered_dataset
+
+
+apply_ui()
+page_header(tr("Datenprüfung und Berechnung", "Data checks and calculations"), tr("Welche Angaben vorhanden sind, woher die Daten stammen und wie die Auswertungen berechnet werden.", "Which information is available, where the data came from, and how the analyses are calculated."))
+
+with database_session() as session:
+    user = selected_user(session)
+    data = filtered_dataset(session)
+    quality = data_quality(data)
+    total = max(1, quality["total"])
+    completeness = [
+        {"label": tr("Notiz vorhanden", "Note available"), "complete": quality["notes"], "total": quality["total"], "rate": quality["notes"] / total},
+        {"label": tr("Beginn in der Notiz erkannt", "Onset recognised in the note"), "complete": quality["onset"], "total": quality["total"], "rate": quality["onset"] / total},
+        {"label": tr("Höhepunkt in der Notiz erkannt", "Peak recognised in the note"), "complete": quality["peak"], "total": quality["total"], "rate": quality["peak"] / total},
+        {"label": tr("Ende in der Notiz erkannt", "End recognised in the note"), "complete": quality["end"], "total": quality["total"], "rate": quality["end"] / total},
+        {"label": tr("Schmerzseite bekannt", "Side of pain known"), "complete": quality["specific_side"], "total": quality["total"], "rate": quality["specific_side"] / total},
+        {"label": tr("Automatisch erkannte Angaben geprüft", "Automatically recognised information reviewed"), "complete": quality["reviewed_interpretation"], "total": quality["total"], "rate": quality["reviewed_interpretation"] / total},
+        {"label": tr("Wirkung der Akutmedikation eingetragen", "Effect of acute medication recorded"), "complete": quality["medication_response"], "total": quality["medication_days"], "rate": quality["medication_response"] / max(1, quality["medication_days"])},
+    ]
+    st.subheader(tr("Welche Angaben sind ausgefüllt?", "Which information has been filled in?"))
+    st.plotly_chart(completeness_chart(completeness), width="stretch", config=chart_config())
+
+    st.subheader(tr("Wie kamen die vorhandenen Daten in die App?", "How did the existing data enter the app?"))
+    source_rows = list(session.scalars(select(MigrationSourceRow).where(MigrationSourceRow.user_id == user.id)))
+    statuses = Counter(row.status for row in source_rows)
+    status_labels = {
+        "daily_only": "Aus Excel übernommene Tage ohne Kopfschmerzen",
+        "imported": "Aus Excel übernommene Kopfschmerzeinträge",
+        "updated": "Beim erneuten Excel-Import aktualisiert",
+        "skipped": "Bereits unverändert aus Excel übernommen",
+        "duplicate": "Doppelte Excel-Zeilen",
+        "rejected": "Nicht übernommene Excel-Zeilen",
+    }
+    provenance = [
+        {"label": localize_value(status_labels.get(status, status)), "count": count}
+        for status, count in sorted(statuses.items())
+        if count
+    ]
+    if provenance:
+        provenance_columns = st.columns(min(4, len(provenance)))
+        for index, item in enumerate(provenance):
+            provenance_columns[index % len(provenance_columns)].metric(item["label"], item["count"])
+    else:
+        st.info(tr("Für diese Person liegen keine Importinformationen vor.", "No import information is available for this person."))
+    warnings = [row for row in source_rows if row.issues]
+    if warnings:
+        warning_count = len(warnings)
+        warning_row_word = tr("Zeile" if warning_count == 1 else "Zeilen", "row" if warning_count == 1 else "rows")
+        warning_verb = "contains" if warning_count == 1 else "contain"
+        st.warning(tr(f"Bei {warning_count} aus Excel übernommenen {warning_row_word} gab es Hinweise, die geprüft werden sollten.", f"{warning_count} {warning_row_word} imported from Excel {warning_verb} notes that should be reviewed."))
+        st.dataframe(
+            pd.DataFrame(
+                {
+                    tr("Datum", "Date"): [format_date(row.record_date) for row in warnings],
+                    tr("Excel-Zeile", "Excel row"): [row.source_row for row in warnings],
+                    tr("Hinweis", "Issue"): [" · ".join(str(localize_value(issue)) for issue in row.issues) for row in warnings],
+                }
+            ),
+            hide_index=True,
+            width="stretch",
+        )
+
+    st.subheader(tr("So werden die Zahlen berechnet", "How the figures are calculated"))
+    methodology = tr(
+        """
+        - **Beobachteter Tag:** Jeder Kalendertag im ausgewählten Zeitraum, unabhängig davon, ob Kopfschmerzen eingetragen wurden.
+        - **Kopfschmerztag:** Ein Tag, für den ein Kopfschmerzeintrag gespeichert ist. Pro Person kann es je Datum nur einen solchen Eintrag geben.
+        - **Angaben aus Notizen:** Uhrzeiten, Schmerzseite, Begleitumstände, Symptome und Maßnahmen werden automatisch im Notiztext gesucht. Sie können anschließend manuell geprüft und korrigiert werden.
+        - **Originalnotiz:** Der ursprüngliche Text bleibt immer unverändert erhalten.
+        - **Vergleiche:** Ein gemeinsames Auftreten oder ein rechnerischer Zusammenhang beweist nicht, dass ein Umstand die Kopfschmerzen verursacht hat.
+        - **Behandlungszeiträume:** Besonders kurze Zeiträume reichen nicht aus, um die Wirksamkeit einer Behandlung zu beurteilen.
+        """,
+        """
+        - **Observed day:** Every calendar day in the selected period, whether or not a headache was recorded.
+        - **Headache day:** A day with a saved headache entry. Each person can have only one such entry per date.
+        - **Information from notes:** Times, side of pain, circumstances, symptoms, and interventions are automatically sought in the note text. They can then be reviewed and corrected manually.
+        - **Original note:** The original text is always retained unchanged.
+        - **Comparisons:** Co-occurrence or a calculated relationship does not prove that a circumstance caused the headaches.
+        - **Treatment periods:** Especially short periods are not enough to assess whether a treatment was effective.
+        """,
+    )
+    st.markdown(methodology)
+    st.markdown(f'<div class="mt-note">{tr("Diese Anwendung unterstützt die Dokumentation und ersetzt keine medizinische Beratung.", "This application supports documentation and does not replace medical advice.")}</div>', unsafe_allow_html=True)
+
+    st.subheader(tr("Verwendete medizinische Quellen", "Medical sources used"))
+    references = tr(
+        "- [DMKG: Kopfschmerzkalender und Patientenmaterial](https://www.dmkg.de/patienten/downloads-und-studien/)\n- [ICHD-3: Kopfschmerz durch Medikamentenübergebrauch](https://ichd-3.org/de/8-kopfschmerz-zurueckzufuehren-auf-eine-substanz-oder-deren-entzug/8-2-kopfschmerz-zurueckzufuehren-auf-einen-medikamentenuebergebrauch/)\n- [International Headache Society: Bedeutung von Kopfschmerzkalendern](https://ihs-headache.org/en/resources/medication-overuse-headache-awareness-campaign/)",
+        "- [DMKG: Headache calendar and patient resources](https://www.dmkg.de/patienten/downloads-und-studien/)\n- [ICHD-3: Medication-overuse headache](https://ichd-3.org/8-headache-attributed-to-a-substance-or-its-withdrawal/8-2-medication-overuse-headache-moh/)\n- [International Headache Society: The role of headache diaries](https://ihs-headache.org/en/resources/medication-overuse-headache-awareness-campaign/)",
+    )
+    st.markdown(references)
+    st.link_button(
+        tr("Originalen DMKG-Kopfschmerzkalender öffnen", "Open the original DMKG headache calendar"),
+        "https://www.dmkg.de/assets/uploads/dateien/kopfschmerzkalender-deutsch-18.3.2021-name.pdf",
+        icon=":material/picture_as_pdf:",
+    )

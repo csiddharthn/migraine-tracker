@@ -1,0 +1,44 @@
+.env
+.env.*
+!.env.example
+.streamlit/secrets.toml
+.venv/
+.runtime/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+artifacts/
+backups/
+
+# Private health data and local exports
+*.xlsx
+*.xls
+*.csv
+*.sql
+*.dump
+*.backup
+*.db
+*.sqlite
+*.sqlite3
+*.log
+recordings/
+*.wav
+*.mp3
+*.m4a
+*.ogg
+*.webm
+
+# Workbook-specific local reconciliation material
+docs/initial_assessment.md
+tests/test_current_workbook_reconciliation.py
+tests/test_analytics_reconciliation.py
+
+# Generated Windows artifacts
+Kopfschmerz-Tracker.exe
+Thumbs.db
+.DS_Store

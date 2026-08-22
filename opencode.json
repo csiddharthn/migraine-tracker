@@ -1,0 +1,93 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "groq/openai/gpt-oss-120b",
+  "small_model": "groq/openai/gpt-oss-20b",
+  "enabled_providers": [
+    "groq"
+  ],
+  "default_agent": "groq-lite",
+  "agent": {
+    "groq-lite": {
+      "description": "Lightweight coding agent sized for Groq free-tier requests",
+      "mode": "primary",
+      "prompt": "Be concise. Inspect before changing files. Never read secrets, .env files, databases, logs, backups, runtime data, or user data. Use only the tools needed for the request.",
+      "steps": 8,
+      "permission": {
+        "*": "deny",
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "list": "allow",
+        "edit": "ask",
+        "bash": "ask"
+      }
+    },
+    "groq-readonly": {
+      "description": "Read-only project inspection without shell commands or edits",
+      "mode": "primary",
+      "prompt": "Inspect code and documentation only. Never modify files and never read secrets, .env files, databases, logs, backups, runtime data, or user data. For project summaries, read targeted entry files such as README.md, pyproject.toml, and app.py; never use broad glob patterns such as **/*. Keep tool output and the final answer concise.",
+      "steps": 8,
+      "permission": {
+        "*": "deny",
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "list": "allow"
+      }
+    },
+    "groq-text": {
+      "description": "Text-only agent for models such as Groq Compound that reject OpenCode local tools",
+      "mode": "primary",
+      "prompt": "Respond directly and concisely without local tools. Do not claim to have inspected local files.",
+      "permission": "deny"
+    }
+  },
+  "provider": {
+    "groq": {
+      "options": {
+        "apiKey": "{env:GROQ_API_KEY}"
+      },
+      "whitelist": [
+        "openai/gpt-oss-120b",
+        "qwen/qwen3.6-27b",
+        "openai/gpt-oss-20b",
+        "groq/compound",
+        "groq/compound-mini"
+      ],
+      "models": {
+        "openai/gpt-oss-120b": {
+          "limit": {
+            "context": 131072,
+            "output": 1024
+          }
+        },
+        "qwen/qwen3.6-27b": {
+          "limit": {
+            "context": 131072,
+            "output": 1024
+          }
+        },
+        "openai/gpt-oss-20b": {
+          "limit": {
+            "context": 131072,
+            "output": 1024
+          }
+        },
+        "groq/compound": {
+          "tool_call": false,
+          "limit": {
+            "context": 131072,
+            "output": 8192
+          }
+        },
+        "groq/compound-mini": {
+          "tool_call": false,
+          "limit": {
+            "context": 131072,
+            "output": 8192
+          }
+        }
+      }
+    }
+  }
+}

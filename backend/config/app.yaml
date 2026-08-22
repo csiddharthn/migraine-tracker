@@ -1,0 +1,42 @@
+application:
+  title: "Kopfschmerz-Tracker"
+  locale: "de-DE"
+  timezone: "Europe/Berlin"
+  page_icon: "assets/migraine_headache_icon.png"
+
+analytics:
+  rolling_frequency_days: 14
+  rolling_interval_days: 28
+  medication_overuse:
+    triptan_days_per_month: 10
+    simple_analgesic_days_per_month: 15
+
+note_interpretation:
+  enabled: true
+  method: "regelbasiert"
+  preserve_original_notes: true
+
+ai_intake:
+  enabled: true
+  provider: "groq"
+  default_model: "openai/gpt-oss-120b"
+  models:
+    - id: "openai/gpt-oss-120b"
+      label_de: "GPT-OSS 120B (leistungsstärker)"
+      label_en: "GPT-OSS 120B (more capable)"
+    - id: "openai/gpt-oss-20b"
+      label_de: "GPT-OSS 20B (schnelleres Ersatzmodell)"
+      label_en: "GPT-OSS 20B (faster fallback)"
+  prompt_version: "1.2"
+  timeout_seconds: 90
+  transcription:
+    enabled: true
+    default_model: "whisper-large-v3"
+    models:
+      - id: "whisper-large-v3"
+        label_de: "Whisper Large v3 (höchste Genauigkeit)"
+        label_en: "Whisper Large v3 (highest accuracy)"
+      - id: "whisper-large-v3-turbo"
+        label_de: "Whisper Large v3 Turbo (schnelleres Ersatzmodell)"
+        label_en: "Whisper Large v3 Turbo (faster fallback)"
+    max_file_size_mb: 25
