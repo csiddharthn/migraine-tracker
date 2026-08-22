@@ -123,7 +123,7 @@ def trigger_description(cfg, code: str, stored_description: str, *, lang: str | 
 
 
 def trigger_text(cfg, code: str, stored_label: str, *, lang: str | None = None) -> str:
-    return trigger_label(code, stored_label, lang=lang)
+    return trigger_label(cfg, code, stored_label, lang=lang)
 
 
 def month_label(cfg, month_key: str, *, lang: str | None = None) -> str:
