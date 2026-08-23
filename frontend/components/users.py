@@ -69,6 +69,11 @@ def render_user_settings(session: Session) -> UserProfile:
                 cred = auth_service.repository.get_by_username(username)
                 if cred is not None:
                     profile = service.repository.get(cred.user_id)
+                    if profile is None:
+                        # Create profile if missing (e.g. after sign-up)
+                        profile = service.create(username, date.today())
+                        profile.role = "user"
+                        session.commit()
                     if profile is not None:
                         st.caption(f"{tr(cfg, 'Auswertung für', 'Analysis for')}: {profile.display_name}")
                         # Allow regular user to update their own full name
@@ -109,6 +114,10 @@ def selected_user(session: Session) -> UserProfile:
             cred = auth_service.repository.get_by_username(username)
             if cred is not None:
                 profile = service.repository.get(cred.user_id)
+                if profile is None:
+                    profile = service.create(username, date.today())
+                    profile.role = "user"
+                    session.commit()
                 if profile is not None:
                     return profile
         st.error(tr(cfg, "Benutzerprofil nicht gefunden.", "User profile not found."))
