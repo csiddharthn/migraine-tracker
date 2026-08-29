@@ -65,6 +65,13 @@ def test_launcher_uses_legacy_env_for_legacy_runtime():
     assert "MIGRAINE_DATABASE_URL" in launcher
 
 
+def test_launcher_restarts_existing_streamlit_python_process():
+    launcher = LAUNCHER_PATH.read_text(encoding="utf-8")
+    assert "OwningProcess" in launcher
+    assert 'ProcessName -in @("python", "pythonw")' in launcher
+    assert "Stop-Process -Id $listener.OwningProcess -Force" in launcher
+
+
 def test_initial_setup_uses_legacy_env_for_legacy_runtime():
     initial_setup = INITIAL_SETUP_PATH.read_text(encoding="utf-8")
     assert 'backend\\database\\.runtime' in initial_setup
