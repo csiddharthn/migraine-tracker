@@ -2,6 +2,7 @@ $ErrorActionPreference = "Stop"
 $projectRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..")).Path
 $python = Join-Path $projectRoot ".venv\Scripts\python.exe"
 $envFile = Join-Path $projectRoot ".env"
+$startPostgres = Join-Path $projectRoot "backend\database\scripts\start_postgres.ps1"
 
 if (-not (Test-Path -LiteralPath $python)) {
   throw "Die Python-Umgebung fehlt. Bitte zuerst die Installation aus der README ausführen."
@@ -12,8 +13,9 @@ if (-not (Test-Path -LiteralPath $envFile)) {
 
 Push-Location $projectRoot
 try {
-  if (Test-Path -LiteralPath (Join-Path $projectRoot ".runtime\pgsql\bin\postgres.exe")) {
-    & (Join-Path $PSScriptRoot "..\database\scripts\start_postgres.ps1")
+  if ((Test-Path -LiteralPath (Join-Path $projectRoot ".runtime\pgsql\bin\postgres.exe")) -or
+      (Test-Path -LiteralPath (Join-Path $projectRoot "backend\database\.runtime\pgsql\bin\postgres.exe"))) {
+    & $startPostgres
   } elseif (Get-Command docker -ErrorAction SilentlyContinue) {
     Write-Host "PostgreSQL wird über Docker gestartet ..."
     docker compose up -d

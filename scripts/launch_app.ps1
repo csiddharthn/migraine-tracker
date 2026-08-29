@@ -6,7 +6,7 @@ $ErrorActionPreference = "Stop"
 
 $projectRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..")).Path
 $python = Join-Path $projectRoot ".venv\Scripts\python.exe"
-$startPostgres = Join-Path $PSScriptRoot "..\database\scripts\start_postgres.ps1"
+$startPostgres = Join-Path $projectRoot "backend\database\scripts\start_postgres.ps1"
 $logDirectory = Join-Path $projectRoot ".runtime\logs"
 $appUrl = "http://127.0.0.1:8501"
 
@@ -16,6 +16,9 @@ try {
     }
     if (-not (Test-Path -LiteralPath (Join-Path $projectRoot ".env"))) {
         throw "Die lokale Konfigurationsdatei .env wurde nicht gefunden."
+    }
+    if (-not (Test-Path -LiteralPath $startPostgres)) {
+        throw "Das PostgreSQL-Startskript wurde nicht gefunden: $startPostgres"
     }
 
     & $startPostgres

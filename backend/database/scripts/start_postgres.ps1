@@ -1,17 +1,33 @@
 $ErrorActionPreference = "Stop"
-$projectRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..")).Path
-$bin = Join-Path $projectRoot ".runtime\pgsql\bin"
-$data = Join-Path $projectRoot ".runtime\pgdata"
-$log = Join-Path $projectRoot ".runtime\postgresql.log"
+
+$repoRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..\..\..")).Path
+$legacyDatabaseRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..")).Path
+
+$runtimeCandidates = @(
+  (Join-Path $repoRoot ".runtime"),
+  (Join-Path $legacyDatabaseRoot ".runtime")
+)
+
+$runtimeRoot = $null
+foreach ($candidate in $runtimeCandidates) {
+  $candidatePgCtl = Join-Path $candidate "pgsql\bin\pg_ctl.exe"
+  $candidatePgVersion = Join-Path $candidate "pgdata\PG_VERSION"
+  if ((Test-Path -LiteralPath $candidatePgCtl) -and (Test-Path -LiteralPath $candidatePgVersion)) {
+    $runtimeRoot = $candidate
+    break
+  }
+}
+
+if (-not $runtimeRoot) {
+  $locations = $runtimeCandidates -join "`n - "
+  throw "Die lokale PostgreSQL-Laufzeit oder der Datenordner wurde nicht gefunden. Geprüfte Orte:`n - $locations"
+}
+
+$bin = Join-Path $runtimeRoot "pgsql\bin"
+$data = Join-Path $runtimeRoot "pgdata"
+$log = Join-Path $runtimeRoot "postgresql.log"
 $pgCtl = Join-Path $bin "pg_ctl.exe"
 $pgIsReady = Join-Path $bin "pg_isready.exe"
-
-if (-not (Test-Path -LiteralPath $pgCtl)) {
-  throw "Die lokale PostgreSQL-Laufzeit fehlt. Bitte zuerst backend/database/scripts/install_portable_postgres.ps1 ausführen."
-}
-if (-not (Test-Path -LiteralPath (Join-Path $data "PG_VERSION"))) {
-  throw "Der lokale PostgreSQL-Datenordner ist nicht initialisiert."
-}
 
 & $pgCtl status -D $data *> $null
 if ($LASTEXITCODE -ne 0) {
@@ -21,4 +37,4 @@ if ($LASTEXITCODE -ne 0) {
 
 & $pgIsReady -h 127.0.0.1 -p 5433 -d postgres *> $null
 if ($LASTEXITCODE -ne 0) { throw "PostgreSQL beantwortet keine Verbindungen auf Port 5433." }
-Write-Host "PostgreSQL ist auf 127.0.0.1:5433 bereit."
+Write-Host "PostgreSQL ist auf 127.0.0.1:5433 bereit. Datenordner: $data"
