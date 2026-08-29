@@ -31,7 +31,7 @@ $pgIsReady = Join-Path $bin "pg_isready.exe"
 
 & $pgCtl status -D $data *> $null
 if ($LASTEXITCODE -ne 0) {
-  & $pgCtl start -D $data -l $log -o '\"-p 5433 -h 127.0.0.1\"' -w
+  & $pgCtl start -D $data -l $log -o '"-p 5433 -h 127.0.0.1"' -w
   if ($LASTEXITCODE -ne 0) { throw "PostgreSQL konnte nicht gestartet werden. Siehe $log" }
 }
 
