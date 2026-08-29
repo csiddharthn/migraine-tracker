@@ -1,3 +1,7 @@
+param(
+  [switch]$PassThruRuntimeRoot
+)
+
 $ErrorActionPreference = "Stop"
 
 $repoRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..\..\..")).Path
@@ -31,10 +35,14 @@ $pgIsReady = Join-Path $bin "pg_isready.exe"
 
 & $pgCtl status -D $data *> $null
 if ($LASTEXITCODE -ne 0) {
-  & $pgCtl start -D $data -l $log -o '"-p 5433 -h 127.0.0.1"' -w
+  & $pgCtl start -D $data -l $log -o '"-p 5433 -h 127.0.0.1"' -w | Out-Host
   if ($LASTEXITCODE -ne 0) { throw "PostgreSQL konnte nicht gestartet werden. Siehe $log" }
 }
 
 & $pgIsReady -h 127.0.0.1 -p 5433 -d postgres *> $null
 if ($LASTEXITCODE -ne 0) { throw "PostgreSQL beantwortet keine Verbindungen auf Port 5433." }
 Write-Host "PostgreSQL ist auf 127.0.0.1:5433 bereit. Datenordner: $data"
+
+if ($PassThruRuntimeRoot) {
+  Write-Output $runtimeRoot
+}
