@@ -192,7 +192,7 @@ def render_ai_intake(
                         transcription_config=transcription_config,
                         preferred_model=preferred_transcription_model,
                         audio=recording.getvalue(),
-                        filename=getattr(cfg, recording, "name", "migraine-description.wav"),
+                        filename=getattr(recording, "name", "migraine-description.wav"),
                         language=None if spoken_language == "auto" else spoken_language,
                     )
                     existing_narrative = str(st.session_state.get(narrative_key, "")).strip()

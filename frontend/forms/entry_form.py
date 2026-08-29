@@ -525,7 +525,7 @@ def _draft_symptom_defaults(draft: AIIntakeDraft | None) -> list[str]:
     if draft is None:
         return []
     defaults = [f"aura:{code}" for code in AURA_CODES if code in draft.aura_codes]
-    defaults.extend(f"symptom:{field}" for field in CORE_SYMPTOMS if getattr(cfg, draft, field) is True)
+    defaults.extend(f"symptom:{field}" for field in CORE_SYMPTOMS if getattr(draft, field) is True)
     defaults.extend(f"other:{code}" for code in OTHER_SYMPTOM_CODES if code in draft.other_symptom_codes)
     return defaults
 

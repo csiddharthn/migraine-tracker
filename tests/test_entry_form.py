@@ -16,9 +16,11 @@ Call hierarchy:
 
 from datetime import time
 
+from backend.ai_intake import AIIntakeDraft
 from backend.note_interpretation import TimelineNoteRow
 from frontend.forms.entry_form import (
     _decode_symptom_selection,
+    _draft_symptom_defaults,
     _medication_validation_error,
     _peak_minute_for_form_value,
     _timeline_validation_error,
@@ -42,6 +44,25 @@ MEDICATION_TIME = time(9, 15)
 def test_unified_symptom_selection_maps_to_existing_fields() -> None:
     values = _decode_symptom_selection(SYMPTOM_SELECTION)
     assert values == EXPECTED_SYMPTOM_VALUES
+
+
+def test_draft_symptom_defaults_include_only_confirmed_symptoms() -> None:
+    draft = AIIntakeDraft(
+        aura_codes=["F"],
+        vomiting=False,
+        nausea=True,
+        phonophobia=None,
+        photophobia=True,
+        osmophobia=False,
+        other_symptom_codes=["T"],
+    )
+
+    assert _draft_symptom_defaults(draft) == [
+        "aura:F",
+        "symptom:nausea",
+        "symptom:photophobia",
+        "other:T",
+    ]
 
 
 def test_timeline_time_rows_reject_end_without_start() -> None:
