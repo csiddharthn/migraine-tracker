@@ -52,6 +52,37 @@ def test_admin_login_sets_admin_session_state(monkeypatch) -> None:
     assert fake_st.session_state["authenticated"] is True
     assert fake_st.session_state["is_admin"] is True
     assert "user_credential_username" not in fake_st.session_state
+    assert "active_user_id" not in fake_st.session_state
+
+
+def test_database_user_login_sets_linked_profile_session(monkeypatch) -> None:
+    fake_st = _FakeStreamlit(username="csiddharthn", password="migraine")
+    monkeypatch.setattr(auth_gate, "st", fake_st)
+    monkeypatch.setattr(auth_gate, "get_settings", _settings)
+    monkeypatch.setattr(auth_gate, "_database_user_identity", lambda username, password: ("profile-id", False))
+
+    with pytest.raises(_RerunSignal):
+        auth_gate.render_auth_gate()
+
+    assert fake_st.session_state["authenticated"] is True
+    assert fake_st.session_state["is_admin"] is False
+    assert fake_st.session_state["user_credential_username"] == "csiddharthn"
+    assert fake_st.session_state["active_user_id"] == "profile-id"
+
+
+def test_database_admin_login_keeps_admin_role(monkeypatch) -> None:
+    fake_st = _FakeStreamlit(username="database-admin", password="secret")
+    monkeypatch.setattr(auth_gate, "st", fake_st)
+    monkeypatch.setattr(auth_gate, "get_settings", _settings)
+    monkeypatch.setattr(auth_gate, "_database_user_identity", lambda username, password: ("admin-profile-id", True))
+
+    with pytest.raises(_RerunSignal):
+        auth_gate.render_auth_gate()
+
+    assert fake_st.session_state["authenticated"] is True
+    assert fake_st.session_state["is_admin"] is True
+    assert fake_st.session_state["user_credential_username"] == "database-admin"
+    assert fake_st.session_state["active_user_id"] == "admin-profile-id"
 
 
 def test_existing_admin_session_is_repaired(monkeypatch) -> None:
