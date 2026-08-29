@@ -92,7 +92,6 @@ def test_credential_repair_preserves_pgdata_and_changes_only_role_password():
     repair = REPAIR_CREDENTIALS_PATH.read_text(encoding="utf-8")
     assert "ALTER ROLE migraine WITH LOGIN PASSWORD" in repair
     assert "CREATE ROLE migraine LOGIN PASSWORD" in repair
-    assert "postgres --single" not in repair  # executable is invoked via $postgres
     assert "& $postgres --single -D $data postgres" in repair
     assert "DROP DATABASE" not in repair.upper()
     assert "initdb" not in repair.lower()
