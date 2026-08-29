@@ -41,6 +41,12 @@ CANONICAL_COLD_DRAFT = "Kälte / Zugluft"
 TRANSLATED_COLD_DRAFT = "Cold / draught"
 CANONICAL_RIGHT = "Rechts"
 TRANSLATED_RIGHT = "Right"
+CANONICAL_COMPOUND = "Rechts · Kälte / Zugluft"
+TRANSLATED_COMPOUND = "Right · Cold / draught"
+CANONICAL_AURA = "Vorboten: F"
+TRANSLATED_AURA = "Aura: Flickering vision"
+CANONICAL_OTHER_SYMPTOM = "Andere Symptome: T"
+TRANSLATED_OTHER_SYMPTOM = "Other symptoms: Watery eyes"
 
 
 def test_month_date_and_number_formats_follow_language() -> None:
@@ -58,6 +64,21 @@ def test_stored_values_are_localized_without_changing_the_canonical_value() -> N
     assert translated == TRANSLATED_COLD_DRAFT
     assert canonical_value(cfg, translated, lang=LANG_EN) == CANONICAL_COLD_DRAFT
     assert localize_value(cfg, CANONICAL_RIGHT, lang=LANG_EN) == TRANSLATED_RIGHT
+
+
+def test_compound_and_timeline_values_keep_configuration_during_localization() -> None:
+    assert localize_value(cfg, CANONICAL_COMPOUND, lang=LANG_EN) == TRANSLATED_COMPOUND
+    assert localize_value(cfg, "03:00 (nächster Tag)", lang=LANG_EN) == "03:00 (next day)"
+    assert localize_value(cfg, "03:00 (2 Tage später)", lang=LANG_EN) == "03:00 (2 days later)"
+
+
+def test_symptom_labels_round_trip_between_stored_codes_and_english() -> None:
+    assert localize_value(cfg, "F", lang=LANG_EN) == "Flickering vision"
+    assert localize_value(cfg, "T", lang=LANG_EN) == "Watery eyes"
+    assert localize_value(cfg, CANONICAL_AURA, lang=LANG_EN) == TRANSLATED_AURA
+    assert localize_value(cfg, CANONICAL_OTHER_SYMPTOM, lang=LANG_EN) == TRANSLATED_OTHER_SYMPTOM
+    assert canonical_value(cfg, TRANSLATED_AURA, lang=LANG_EN) == CANONICAL_AURA
+    assert canonical_value(cfg, TRANSLATED_OTHER_SYMPTOM, lang=LANG_EN) == CANONICAL_OTHER_SYMPTOM
 
 
 def test_builtin_trigger_labels_are_localized_by_stable_code() -> None:

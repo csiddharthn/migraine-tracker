@@ -41,30 +41,37 @@ def localize_value(cfg, value: Any, *, lang: str | None = None) -> Any:
     if not isinstance(value, str):
         return value
     if " · " in value:
-        return " · ".join(str(localize_value(part, lang=lang)) for part in value.split(" · "))
+        return " · ".join(
+            str(localize_value(cfg, part, lang=resolved_language)) for part in value.split(" · ")
+        )
     if value in cfg.AURA_LABELS:
-        return aura_label(value, lang=resolved_language)
+        return aura_label(cfg, value, lang=resolved_language)
     if value in cfg.OTHER_SYMPTOM_LABELS:
-        return other_symptom_label(value, lang=resolved_language)
+        return other_symptom_label(cfg, value, lang=resolved_language)
     if value in cfg.CODE_LABELS:
         german, english = cfg.CODE_LABELS[value]
         return tr(cfg, german, english, lang=resolved_language)
     next_day = re.match(r"^(\d{2}:\d{2}) \(nächster Tag\)$", value)
     if next_day:
-        return tr(value, f"{next_day.group(1)} (next day)", lang=resolved_language)
+        return tr(cfg, value, f"{next_day.group(1)} (next day)", lang=resolved_language)
     later_day = re.match(r"^(\d{2}:\d{2}) \((\d+) Tage später\)$", value)
     if later_day:
-        return tr(value, f"{later_day.group(1)} ({later_day.group(2)} days later)", lang=resolved_language)
+        return tr(
+            cfg,
+            value,
+            f"{later_day.group(1)} ({later_day.group(2)} days later)",
+            lang=resolved_language,
+        )
     if resolved_language != "en":
         return value
     if value in cfg.VALUE_TRANSLATIONS:
         return cfg.VALUE_TRANSLATIONS[value]
     if value.startswith("Vorboten: "):
         code = value.removeprefix("Vorboten: ")
-        return f"Aura: {aura_label(code, lang=lang)}"
+        return f"Aura: {aura_label(cfg, code, lang=resolved_language)}"
     if value.startswith("Andere Symptome: "):
         code = value.removeprefix("Andere Symptome: ")
-        return f"Other symptoms: {other_symptom_label(code, lang=lang)}"
+        return f"Other symptoms: {other_symptom_label(cfg, code, lang=resolved_language)}"
     trigger_match = re.match(r"^([A-Z0-9*]+)\s+–\s+(.+)$", value)
     if trigger_match and trigger_match.group(1) in cfg.TRIGGER_LABELS_EN:
         return f"{trigger_match.group(1)} – {cfg.TRIGGER_LABELS_EN[trigger_match.group(1)]}"
@@ -79,11 +86,18 @@ def canonical_value(cfg, value: str, *, lang: str | None = None) -> str:
         return value
     if value.startswith("Aura: "):
         label = value.removeprefix("Aura: ")
-        code = next((code for code in cfg.AURA_LABELS if aura_label(code, lang="en") == label), label)
+        code = next((code for code in cfg.AURA_LABELS if aura_label(cfg, code, lang="en") == label), label)
         return f"Vorboten: {code}"
     if value.startswith("Other symptoms: "):
         label = value.removeprefix("Other symptoms: ")
-        code = next((code for code in cfg.OTHER_SYMPTOM_LABELS if other_symptom_label(code, lang="en") == label), label)
+        code = next(
+            (
+                code
+                for code in cfg.OTHER_SYMPTOM_LABELS
+                if other_symptom_label(cfg, code, lang="en") == label
+            ),
+            label,
+        )
         return f"Andere Symptome: {code}"
     code_reverse = {english: code for code, (_, english) in cfg.CODE_LABELS.items()}
     if value in code_reverse:
