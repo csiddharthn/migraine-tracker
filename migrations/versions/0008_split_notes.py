@@ -20,8 +20,15 @@ def upgrade() -> None:
     op.add_column("migraine_entries", sa.Column("possible_factors", sa.Text(), nullable=False, server_default=""))
     op.add_column("migraine_entries", sa.Column("symptoms_and_actions", sa.Text(), nullable=False, server_default=""))
     op.add_column("migraine_entries", sa.Column("other_notes", sa.Text(), nullable=False, server_default=""))
-    # Migrate existing notes data (best-effort split via Python logic in data script)
-    # Drop old notes column after migration
+    # Preserve the complete legacy text before removing its source column. A
+    # later, user-reviewed cleanup can split this text more precisely, but the
+    # schema migration itself must never discard or reinterpret diary content.
+    op.execute(
+        sa.text(
+            "UPDATE migraine_entries "
+            "SET timeline_notes = COALESCE(notes, '')"
+        )
+    )
     op.drop_column("migraine_entries", "notes")
 
 
