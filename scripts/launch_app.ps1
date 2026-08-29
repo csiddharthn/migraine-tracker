@@ -7,6 +7,7 @@ $ErrorActionPreference = "Stop"
 $projectRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..")).Path
 $python = Join-Path $projectRoot ".venv\Scripts\python.exe"
 $startPostgres = Join-Path $projectRoot "backend\database\scripts\start_postgres.ps1"
+$repairPostgresCredentials = Join-Path $projectRoot "backend\database\scripts\repair_local_postgres_credentials.ps1"
 $repoEnvFile = Join-Path $projectRoot ".env"
 $legacyRuntimeRoot = Join-Path $projectRoot "backend\database\.runtime"
 $legacyEnvFile = Join-Path $projectRoot "backend\database\.env"
@@ -40,6 +41,27 @@ function Import-DatabaseEnvironment {
     if (-not $env:MIGRAINE_DATABASE_URL) {
         throw "MIGRAINE_DATABASE_URL fehlt in der Datenbank-Konfiguration: $databaseEnvFile"
     }
+    if (-not $env:POSTGRES_PASSWORD) {
+        throw "POSTGRES_PASSWORD fehlt in der Datenbank-Konfiguration: $databaseEnvFile"
+    }
+}
+
+function Test-LocalDatabaseCredential {
+    param(
+        [Parameter(Mandatory = $true)][string]$RuntimeRoot
+    )
+
+    $psql = Join-Path $RuntimeRoot "pgsql\bin\psql.exe"
+    if (-not (Test-Path -LiteralPath $psql)) { return $false }
+
+    $env:PGPASSWORD = $env:POSTGRES_PASSWORD
+    try {
+        & $psql -h 127.0.0.1 -p 5433 -U migraine -d migraine_tracker -tAc "SELECT 1" *> $null
+        return $LASTEXITCODE -eq 0
+    }
+    finally {
+        Remove-Item Env:PGPASSWORD -ErrorAction SilentlyContinue
+    }
 }
 
 try {
@@ -58,6 +80,17 @@ try {
         throw "Der verwendete PostgreSQL-Datenordner konnte nicht ermittelt werden."
     }
     Import-DatabaseEnvironment -RuntimeRoot $runtimeRoot
+
+    if (-not (Test-LocalDatabaseCredential -RuntimeRoot $runtimeRoot)) {
+        if (-not (Test-Path -LiteralPath $repairPostgresCredentials)) {
+            throw "Die PostgreSQL-Anmeldung stimmt nicht mit .env überein und das Reparaturskript fehlt."
+        }
+        Write-Host "Das lokale PostgreSQL-Passwort stimmt nicht mit der aktuellen .env-Datei überein. Es wird einmalig repariert."
+        & $repairPostgresCredentials -RuntimeRoot $runtimeRoot
+        if ($LASTEXITCODE -ne 0) {
+            throw "Die lokale PostgreSQL-Anmeldung konnte nicht repariert werden."
+        }
+    }
 
     Push-Location $projectRoot
     try {

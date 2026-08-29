@@ -13,12 +13,14 @@ EXPECTED_SCRIPT_NAMES = [
     "start_postgres.ps1",
     "stop_postgres.ps1",
     "install_portable_postgres.ps1",
+    "repair_local_postgres_credentials.ps1",
 ]
 README_PATH = Path("README.md")
 LAUNCHER_PATH = Path("scripts/launch_app.ps1")
 INITIAL_SETUP_PATH = Path("scripts/initial_setup.ps1")
 INSTALLER_PATH = SCRIPTS_DIR / "install_portable_postgres.ps1"
 START_POSTGRES_PATH = SCRIPTS_DIR / "start_postgres.ps1"
+REPAIR_CREDENTIALS_PATH = SCRIPTS_DIR / "repair_local_postgres_credentials.ps1"
 EXPECTED_REFERENCE = "backend/database/scripts/"
 OLD_REFERENCE = "scripts\\backup_database.ps1"
 
@@ -77,3 +79,19 @@ def test_initial_setup_uses_legacy_env_for_legacy_runtime():
     assert 'backend\\database\\.runtime' in initial_setup
     assert 'backend\\database\\.env' in initial_setup
     assert "Import-DatabaseEnvironment" in initial_setup
+
+
+def test_launcher_repairs_mismatched_local_database_password():
+    launcher = LAUNCHER_PATH.read_text(encoding="utf-8")
+    assert "Test-LocalDatabaseCredential" in launcher
+    assert "repair_local_postgres_credentials.ps1" in launcher
+    assert "POSTGRES_PASSWORD" in launcher
+
+
+def test_credential_repair_preserves_pgdata_and_changes_only_role_password():
+    repair = REPAIR_CREDENTIALS_PATH.read_text(encoding="utf-8")
+    assert "ALTER ROLE migraine WITH LOGIN PASSWORD" in repair
+    assert "CREATE ROLE migraine LOGIN PASSWORD" in repair
+    assert "& $postgres --single -D $data postgres" in repair
+    assert "DROP DATABASE" not in repair.upper()
+    assert "initdb" not in repair.lower()
