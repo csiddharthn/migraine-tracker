@@ -28,7 +28,7 @@ function Import-DatabaseEnvironment {
         Write-Host "Die bestehende Datenbank unter backend\database\.runtime wird mit ihrer zugehörigen Datenbank-Konfiguration verwendet."
     }
 
-    foreach ($name in @("POSTGRES_PASSWORD", "MIGRAINE_DATABASE_URL", "MIGRAINE_TEST_DATABASE_URL")) {
+    foreach ($name in @("POSTGRES_PASSWORD")) {
         $prefix = "$name="
         $line = Get-Content -LiteralPath $databaseEnvFile -Encoding utf8 |
             Where-Object { $_.StartsWith($prefix) } |
@@ -38,12 +38,17 @@ function Import-DatabaseEnvironment {
         }
     }
 
-    if (-not $env:MIGRAINE_DATABASE_URL) {
-        throw "MIGRAINE_DATABASE_URL fehlt in der Datenbank-Konfiguration: $databaseEnvFile"
-    }
     if (-not $env:POSTGRES_PASSWORD) {
         throw "POSTGRES_PASSWORD fehlt in der Datenbank-Konfiguration: $databaseEnvFile"
     }
+
+    # Do not trust MIGRAINE_DATABASE_URL from a moved/copied .env file. It may
+    # contain a stale password or even the literal ${POSTGRES_PASSWORD}
+    # placeholder from .env.example. For the local portable PostgreSQL runtime,
+    # derive both URLs from the one canonical password value instead.
+    $encodedPassword = [System.Uri]::EscapeDataString($env:POSTGRES_PASSWORD)
+    $env:MIGRAINE_DATABASE_URL = "postgresql+psycopg://migraine:$encodedPassword@127.0.0.1:5433/migraine_tracker"
+    $env:MIGRAINE_TEST_DATABASE_URL = "postgresql+psycopg://migraine:$encodedPassword@127.0.0.1:5433/migraine_tracker_test"
 }
 
 function Test-LocalDatabaseCredential {
