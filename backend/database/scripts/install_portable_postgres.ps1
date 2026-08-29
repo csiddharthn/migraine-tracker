@@ -4,7 +4,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 $ProgressPreference = "SilentlyContinue"
-$projectRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..")).Path
+$projectRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..\..\..")).Path
 $runtimeRoot = Join-Path $projectRoot ".runtime"
 $pgsqlRoot = Join-Path $runtimeRoot "pgsql"
 $dataRoot = Join-Path $runtimeRoot "pgdata"
