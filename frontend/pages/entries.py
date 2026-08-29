@@ -12,6 +12,7 @@ from frontend.components.ui import apply_ui, format_date, page_header
 from frontend.components.users import selected_user, user_caption
 from frontend.forms import render_entry_form, render_interpretation_review
 from frontend.forms.ai_intake import render_ai_intake
+from frontend.forms.structured_import import render_structured_import
 from frontend.config.name_space import cfg
 from frontend.i18n import (
     date_input_format,
@@ -33,10 +34,11 @@ with database_session() as session:
     active_triggers = service.repository.list_trigger_definitions(active_only=True)
     all_triggers = service.repository.list_trigger_definitions(active_only=False)
     medication_options = service.repository.list_medication_names()
-    new_tab, ai_tab, edit_tab, trigger_tab = st.tabs(
+    new_tab, ai_tab, import_tab, edit_tab, trigger_tab = st.tabs(
         [
             tr(cfg, "Neuer Eintrag", "New entry"),
             tr(cfg, "KI-gestützter Eintrag", "AI-assisted entry"),
+            tr(cfg, "Strukturierter Import", "Structured import"),
             tr(cfg, "Eintrag bearbeiten", "Edit entry"),
             tr(cfg, "Auslöser verwalten", "Manage triggers"),
         ]
@@ -56,6 +58,15 @@ with database_session() as session:
 
     with ai_tab:
         render_ai_intake(
+            entry_service=service,
+            trigger_definitions=active_triggers,
+            medication_options=medication_options,
+            user_id=str(user.id),
+            session=session,
+        )
+
+    with import_tab:
+        render_structured_import(
             entry_service=service,
             trigger_definitions=active_triggers,
             medication_options=medication_options,
