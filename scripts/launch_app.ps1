@@ -66,22 +66,31 @@ try {
             throw "Die Datenbank konnte nicht aktualisiert werden."
         }
 
-        $listener = Get-NetTCPConnection -LocalPort 8501 -State Listen -ErrorAction SilentlyContinue
-        if (-not $listener) {
-            New-Item -ItemType Directory -Path $logDirectory -Force | Out-Null
-            Start-Process `
-                -FilePath $python `
-                -ArgumentList @(
-                    "-m", "streamlit", "run", "app.py",
-                    "--server.address", "127.0.0.1",
-                    "--server.port", "8501",
-                    "--server.headless", "true"
-                ) `
-                -WorkingDirectory $projectRoot `
-                -WindowStyle Hidden `
-                -RedirectStandardOutput (Join-Path $logDirectory "streamlit.stdout.log") `
-                -RedirectStandardError (Join-Path $logDirectory "streamlit.stderr.log")
+        $listener = Get-NetTCPConnection -LocalPort 8501 -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1
+        if ($listener) {
+            $existingProcess = Get-Process -Id $listener.OwningProcess -ErrorAction SilentlyContinue
+            if ($existingProcess -and $existingProcess.ProcessName -in @("python", "pythonw")) {
+                Write-Host "Eine laufende Kopfschmerz-Tracker-Instanz wird neu gestartet, damit die aktuelle Datenbank-Konfiguration verwendet wird."
+                Stop-Process -Id $listener.OwningProcess -Force
+                Start-Sleep -Milliseconds 500
+            } else {
+                throw "Port 8501 wird bereits von einem anderen Prozess verwendet. Bitte diesen Prozess beenden und den Kopfschmerz-Tracker erneut starten."
+            }
         }
+
+        New-Item -ItemType Directory -Path $logDirectory -Force | Out-Null
+        Start-Process `
+            -FilePath $python `
+            -ArgumentList @(
+                "-m", "streamlit", "run", "app.py",
+                "--server.address", "127.0.0.1",
+                "--server.port", "8501",
+                "--server.headless", "true"
+            ) `
+            -WorkingDirectory $projectRoot `
+            -WindowStyle Hidden `
+            -RedirectStandardOutput (Join-Path $logDirectory "streamlit.stdout.log") `
+            -RedirectStandardError (Join-Path $logDirectory "streamlit.stderr.log")
     }
     finally {
         Pop-Location
