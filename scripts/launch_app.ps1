@@ -6,6 +6,8 @@ $ErrorActionPreference = "Stop"
 
 $projectRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..")).Path
 $python = Join-Path $projectRoot ".venv\Scripts\python.exe"
+$pyprojectFile = Join-Path $projectRoot "pyproject.toml"
+$dependencyStampFile = Join-Path $projectRoot ".venv\.migraine-tracker-dependencies.sha256"
 $startPostgres = Join-Path $projectRoot "backend\database\scripts\start_postgres.ps1"
 $repairPostgresCredentials = Join-Path $projectRoot "backend\database\scripts\repair_local_postgres_credentials.ps1"
 $repoEnvFile = Join-Path $projectRoot ".env"
@@ -13,6 +15,34 @@ $legacyRuntimeRoot = Join-Path $projectRoot "backend\database\.runtime"
 $legacyEnvFile = Join-Path $projectRoot "backend\database\.env"
 $logDirectory = Join-Path $projectRoot ".runtime\logs"
 $appUrl = "http://127.0.0.1:8501"
+
+function Sync-ProjectDependencies {
+    if (-not (Test-Path -LiteralPath $pyprojectFile)) {
+        throw "Die Python-Projektdatei wurde nicht gefunden: $pyprojectFile"
+    }
+
+    $currentHash = (Get-FileHash -LiteralPath $pyprojectFile -Algorithm SHA256).Hash
+    $installedHash = if (Test-Path -LiteralPath $dependencyStampFile) {
+        (Get-Content -LiteralPath $dependencyStampFile -Encoding ascii -Raw).Trim()
+    } else {
+        ""
+    }
+
+    & $python -c "import xlsxwriter" *> $null
+    $xlsxWriterAvailable = $LASTEXITCODE -eq 0
+
+    if (($installedHash -eq $currentHash) -and $xlsxWriterAvailable) {
+        return
+    }
+
+    Write-Host "Die Python-Abhängigkeiten werden mit der aktuellen Anwendungsversion abgeglichen..."
+    & $python -m pip install --disable-pip-version-check -e $projectRoot
+    if ($LASTEXITCODE -ne 0) {
+        throw "Die Python-Abhängigkeiten konnten nicht installiert bzw. aktualisiert werden. Bitte Internetverbindung prüfen und den Kopfschmerz-Tracker erneut starten."
+    }
+
+    Set-Content -LiteralPath $dependencyStampFile -Value $currentHash -Encoding ascii
+}
 
 function Import-DatabaseEnvironment {
     param(
@@ -79,6 +109,8 @@ try {
     if (-not (Test-Path -LiteralPath $startPostgres)) {
         throw "Das PostgreSQL-Startskript wurde nicht gefunden: $startPostgres"
     }
+
+    Sync-ProjectDependencies
 
     $runtimeRoot = (& $startPostgres -PassThruRuntimeRoot | Select-Object -Last 1)
     if (-not $runtimeRoot) {
