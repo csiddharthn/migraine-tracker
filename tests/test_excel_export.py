@@ -64,7 +64,7 @@ def test_professional_excel_contains_overview_patient_context_and_data_table() -
     assert 'state="frozen"' in data_xml
     assert "<tableParts" in data_xml
     assert 'name="MigraineExportData"' in table_xml
-    assert 'tableStyleMedium2' in table_xml
+    assert 'name="TableStyleMedium2"' in table_xml
     assert "<mergeCell" in overview_xml
 
 
