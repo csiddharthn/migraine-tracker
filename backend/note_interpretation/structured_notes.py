@@ -151,6 +151,16 @@ def format_structured_notes(value: StructuredNotes) -> str:
     ).strip()
 
 
+def format_timeline_notes(value: StructuredNotes) -> str:
+    """Format only the content that belongs in the timeline database column."""
+    timeline_lines = [_format_timeline_row(row) for row in value.timeline if _row_has_content(row)]
+    if value.peak_start_minute is not None:
+        timeline_lines.append(_format_peak(value.peak_start_minute, value.peak_duration_minutes))
+    if not timeline_lines:
+        return ""
+    return "Zeitlicher Ablauf:\n\n" + "\n".join(timeline_lines)
+
+
 def _section_key(heading: str) -> str:
     normalized = heading.casefold()
     if normalized == "zeitlicher ablauf":

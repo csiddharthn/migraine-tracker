@@ -19,6 +19,7 @@ from backend.note_interpretation import (
     StructuredNotes,
     TimelineNoteRow,
     format_structured_notes,
+    format_timeline_notes,
     parse_structured_notes,
 )
 
@@ -77,6 +78,28 @@ def test_peak_format_handles_crossing_midnight() -> None:
     assert MIDNIGHT_FORMAT_STRING in notes
     assert interpretation.peak_start_minute == MIDNIGHT_PEAK_START
     assert interpretation.peak_end_minute == MIDNIGHT_PEAK_END
+
+
+def test_timeline_formatter_excludes_content_stored_in_separate_columns() -> None:
+    value = StructuredNotes(
+        timeline=(TimelineNoteRow(START_TIME, END_TIME, "Kopfschmerzen bestanden."),),
+        peak_start_minute=PEAK_START_MINUTE,
+        peak_duration_minutes=PEAK_DURATION_MINUTES,
+        possible_factors=POSSIBLE_FACTORS,
+        symptoms_and_actions=SYMPTOMS_AND_ACTIONS,
+    )
+
+    notes = format_timeline_notes(value)
+    parsed = parse_structured_notes(notes)
+
+    assert notes.startswith(NOTES_START_PREFIX)
+    assert POSSIBLE_FACTORS not in notes
+    assert SYMPTOMS_AND_ACTIONS not in notes
+    assert parsed.timeline == value.timeline
+    assert parsed.peak_start_minute == value.peak_start_minute
+    assert parsed.peak_duration_minutes == value.peak_duration_minutes
+    assert parsed.possible_factors == ""
+    assert parsed.symptoms_and_actions == ""
 
 
 def test_legacy_note_without_headings_remains_available() -> None:
