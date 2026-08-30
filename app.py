@@ -69,6 +69,8 @@ with st.sidebar:
         key="app_language",
         width="stretch",
     )
+    render_logout_button()
+    st.divider()
 
 try:
     with database_session() as session:
@@ -84,7 +86,5 @@ with st.sidebar:
         st.caption(section_title)
         for path, title, icon, _ in section_specs:
             st.page_link(pages_by_path[path], label=title, icon=icon, width="stretch")
-    st.divider()
-    render_logout_button()
 
 navigation.run()
