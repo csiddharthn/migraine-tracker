@@ -22,15 +22,16 @@ def table_datetime_format(language: str) -> str:
 
 
 def dataframe_to_semicolon_csv(frame: pd.DataFrame, *, language: str) -> bytes:
-    """Serialize the displayed table as a one-record-per-line semicolon CSV."""
+    """Serialize the displayed table as an Excel-friendly semicolon CSV."""
     export_frame = frame.map(lambda value: _export_cell(value, language=language))
-    csv_text = export_frame.to_csv(
+    table_text = export_frame.to_csv(
         index=False,
         sep=";",
-        quoting=csv.QUOTE_ALL,
+        quoting=csv.QUOTE_MINIMAL,
         lineterminator="\r\n",
         na_rep="",
     )
+    csv_text = f"sep=;\r\n{table_text}"
     return csv_text.encode("utf-8-sig")
 
 
