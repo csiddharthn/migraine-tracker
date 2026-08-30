@@ -21,6 +21,7 @@ from backend.note_interpretation import (
     format_structured_notes,
     format_timeline_notes,
     parse_structured_notes,
+    parse_timeline_notes,
 )
 
 START_TIME = time(15, 0)
@@ -90,9 +91,9 @@ def test_timeline_formatter_excludes_content_stored_in_separate_columns() -> Non
     )
 
     notes = format_timeline_notes(value)
-    parsed = parse_structured_notes(notes)
+    parsed = parse_timeline_notes(notes)
 
-    assert notes.startswith(NOTES_START_PREFIX)
+    assert not notes.startswith(NOTES_START_PREFIX)
     assert POSSIBLE_FACTORS not in notes
     assert SYMPTOMS_AND_ACTIONS not in notes
     assert parsed.timeline == value.timeline
@@ -100,6 +101,10 @@ def test_timeline_formatter_excludes_content_stored_in_separate_columns() -> Non
     assert parsed.peak_duration_minutes == value.peak_duration_minutes
     assert parsed.possible_factors == ""
     assert parsed.symptoms_and_actions == ""
+
+    parsed_with_legacy_heading = parse_timeline_notes(f"{NOTES_START_PREFIX}\n\n{notes}")
+    assert parsed_with_legacy_heading.timeline == value.timeline
+    assert parsed_with_legacy_heading.peak_start_minute == value.peak_start_minute
 
 
 def test_legacy_note_without_headings_remains_available() -> None:

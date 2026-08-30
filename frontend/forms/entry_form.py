@@ -23,7 +23,7 @@ from pydantic import ValidationError
 
 from backend.ai_intake import AIIntakeDraft
 from backend.models import DailyRecord, MigraineEntry, TriggerDefinition
-from backend.note_interpretation import StructuredNotes, TimelineNoteRow, format_timeline_notes, parse_structured_notes
+from backend.note_interpretation import StructuredNotes, TimelineNoteRow, format_timeline_notes, parse_timeline_notes
 from backend.services.schemas import EntryInput, MedicationInput
 from frontend.config.name_space import cfg
 from frontend.i18n import (
@@ -75,7 +75,7 @@ def render_entry_form(
     if draft is not None and existing is None:
         note_defaults = draft.structured_notes()
     else:
-        note_defaults = parse_structured_notes(
+        note_defaults = parse_timeline_notes(
             existing.timeline_notes if existing else "",
             peak_start_minute=existing_interpretation.peak_start_minute if existing_interpretation else None,
             peak_end_minute=existing_interpretation.peak_end_minute if existing_interpretation else None,
@@ -364,7 +364,7 @@ def render_entry_form(
         symptoms_and_actions=symptoms_and_actions.strip(),
     )
     note_fields_changed = existing is None or (
-        structured_notes.timeline != (parse_structured_notes(existing.timeline_notes or "").timeline if existing else ())
+        structured_notes.timeline != (parse_timeline_notes(existing.timeline_notes or "").timeline if existing else ())
         or structured_notes.possible_factors != (existing.possible_factors or "")
         or structured_notes.symptoms_and_actions != (existing.symptoms_and_actions or "")
         or other_notes.strip() != (existing.other_notes or "")

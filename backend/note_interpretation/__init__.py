@@ -3,7 +3,7 @@
 Usage: Re-exports interpreter and structured notes classes.
 
 Functions available:
-- format_structured_notes, format_timeline_notes, parse_structured_notes
+- format_structured_notes, format_timeline_notes, parse_structured_notes, parse_timeline_notes
 
 Classes available:
 - NoteInterpreter, InterpretationResult, StructuredNotes, TimelineNoteRow
@@ -19,6 +19,7 @@ from .structured_notes import (
     format_structured_notes,
     format_timeline_notes,
     parse_structured_notes,
+    parse_timeline_notes,
 )
 
 
@@ -30,4 +31,5 @@ __all__ = [
     "format_structured_notes",
     "format_timeline_notes",
     "parse_structured_notes",
+    "parse_timeline_notes",
 ]

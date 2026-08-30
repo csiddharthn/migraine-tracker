@@ -133,6 +133,23 @@ def parse_structured_notes(
     )
 
 
+def parse_timeline_notes(
+    notes: str,
+    *,
+    peak_start_minute: int | None = None,
+    peak_end_minute: int | None = None,
+) -> StructuredNotes:
+    """Parse text from the dedicated timeline column, with or without its old heading."""
+    cleaned = notes.strip()
+    if cleaned and not SECTION_PATTERN.search(cleaned):
+        cleaned = f"Zeitlicher Ablauf:\n\n{cleaned}"
+    return parse_structured_notes(
+        cleaned,
+        peak_start_minute=peak_start_minute,
+        peak_end_minute=peak_end_minute,
+    )
+
+
 def format_structured_notes(value: StructuredNotes) -> str:
     timeline_lines = [_format_timeline_row(row) for row in value.timeline if _row_has_content(row)]
     if value.peak_start_minute is not None:
@@ -158,7 +175,7 @@ def format_timeline_notes(value: StructuredNotes) -> str:
         timeline_lines.append(_format_peak(value.peak_start_minute, value.peak_duration_minutes))
     if not timeline_lines:
         return ""
-    return "Zeitlicher Ablauf:\n\n" + "\n".join(timeline_lines)
+    return "\n".join(timeline_lines)
 
 
 def _section_key(heading: str) -> str:
