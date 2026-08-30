@@ -6,11 +6,16 @@ import pandas as pd
 import streamlit as st
 
 from backend.services.database_explorer import DatabaseExplorerService
+from frontend.components.csv_export import (
+    dataframe_to_semicolon_csv,
+    table_date_format,
+    table_datetime_format,
+)
 from frontend.components.state import database_session
 from frontend.components.ui import apply_ui, page_header
 from frontend.components.users import selected_user, user_caption
 from frontend.config.name_space import cfg
-from frontend.i18n import column_label, localize_value, tr, yes_no
+from frontend.i18n import column_label, current_language, localize_value, tr, yes_no
 
 
 def _localized_cell(value):
@@ -64,14 +69,15 @@ with database_session() as session:
     if frame.empty:
         st.info(tr(cfg, "Für diese Auswahl sind keine Datensätze vorhanden.", "No records are available for this selection."))
     else:
+        language = current_language(cfg)
         column_config = {
-            column: st.column_config.DateColumn(format="DD.MM.YYYY")
+            column: st.column_config.DateColumn(format=table_date_format(language))
             for column in (tr(cfg, "Datum", "Date"), tr(cfg, "Datum des Eintrags", "Entry date"), tr(cfg, "Erfassungsbeginn", "Tracking start"))
             if column in frame.columns
         }
         column_config.update(
             {
-                column: st.column_config.DatetimeColumn(format="DD.MM.YYYY HH:mm:ss")
+                column: st.column_config.DatetimeColumn(format=table_datetime_format(language))
                 for column in (tr(cfg, "Zeitpunkt", "Timestamp"), tr(cfg, "Importiert am", "Imported at"), tr(cfg, "Geprüft am", "Reviewed at"), tr(cfg, "Erstellt", "Created"), tr(cfg, "Geändert", "Updated"))
                 if column in frame.columns
             }
@@ -85,9 +91,9 @@ with database_session() as session:
         )
         st.download_button(
             tr(cfg, "CSV herunterladen", "Download CSV"),
-            data=frame.to_csv(index=False, sep=";").encode("utf-8-sig"),
+            data=dataframe_to_semicolon_csv(frame, language=language),
             file_name=f"{selected_key}_{date.today():%Y%m%d}.csv",
-            mime="text/csv",
+            mime="text/csv; charset=utf-8",
             icon=":material/download:",
         )
 
