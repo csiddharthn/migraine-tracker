@@ -11,6 +11,7 @@ from frontend.components.csv_export import (
     table_date_format,
     table_datetime_format,
 )
+from frontend.components.excel_export import dataframe_to_professional_excel
 from frontend.components.state import database_session
 from frontend.components.ui import apply_ui, page_header
 from frontend.components.users import selected_user, user_caption
@@ -89,13 +90,36 @@ with database_session() as session:
             height=min(720, max(280, 36 * len(frame) + 42)),
             column_config=column_config,
         )
-        st.download_button(
-            tr(cfg, "CSV herunterladen", "Download CSV"),
-            data=dataframe_to_semicolon_csv(frame, language=language),
-            file_name=f"{selected_key}_{date.today():%Y%m%d}.csv",
-            mime="text/csv; charset=utf-16le",
-            icon=":material/download:",
-        )
+
+        csv_column, excel_column = st.columns(2)
+        with csv_column:
+            st.download_button(
+                tr(cfg, "CSV herunterladen", "Download CSV"),
+                data=dataframe_to_semicolon_csv(frame, language=language),
+                file_name=f"{selected_key}_{date.today():%Y%m%d}.csv",
+                mime="text/csv; charset=utf-16le",
+                icon=":material/download:",
+            )
+        with excel_column:
+            st.download_button(
+                tr(cfg, "Excel herunterladen", "Download Excel"),
+                data=dataframe_to_professional_excel(
+                    frame,
+                    language=language,
+                    patient_name=user.display_name,
+                    tracking_start_date=user.tracking_start_date,
+                    patient_active=user.active,
+                    area_label=labels[selected_key],
+                    area_description=localize_value(cfg, table.descriptor.description),
+                    scope=scope,
+                    counts=counts,
+                    search_term=search,
+                    include_technical_fields=show_technical,
+                ),
+                file_name=f"{selected_key}_{date.today():%Y%m%d}.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                icon=":material/table_view:",
+            )
 
     with st.expander(tr(cfg, "Technische Informationen zu den Datenbereichen", "Technical information about the data areas")):
         st.dataframe(
