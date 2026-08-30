@@ -69,6 +69,16 @@ def test_start_postgres_recovers_when_cluster_is_running_on_wrong_port():
     assert "-p 5433 -h 127.0.0.1" in start_script
 
 
+def test_start_postgres_prefers_existing_legacy_runtime_and_stops_competing_runtime():
+    start_script = START_POSTGRES_PATH.read_text(encoding="utf-8")
+    legacy_reference = '(Join-Path $legacyDatabaseRoot ".runtime")'
+    root_reference = '(Join-Path $repoRoot ".runtime")'
+    assert start_script.index(legacy_reference) < start_script.index(root_reference)
+    assert "$validRuntimeRoots" in start_script
+    assert "$otherRuntimeRoot" in start_script
+    assert "& $otherPgCtl stop -D $otherData -m fast -w" in start_script
+
+
 def test_launcher_uses_legacy_env_for_legacy_runtime():
     launcher = LAUNCHER_PATH.read_text(encoding="utf-8")
     assert 'backend\\database\\.runtime' in launcher
