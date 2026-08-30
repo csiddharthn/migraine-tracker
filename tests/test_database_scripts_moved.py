@@ -59,6 +59,16 @@ def test_start_postgres_can_report_selected_runtime():
     assert "Write-Output $runtimeRoot" in start_script
 
 
+def test_start_postgres_recovers_when_cluster_is_running_on_wrong_port():
+    start_script = START_POSTGRES_PATH.read_text(encoding="utf-8")
+    assert "Test-TrackerPostgresReady" in start_script
+    assert "if ($clusterRunning)" in start_script
+    assert "if (-not (Test-TrackerPostgresReady))" in start_script
+    assert "& $pgCtl stop -D $data -m fast -w" in start_script
+    assert "$serverOptions" in start_script
+    assert "-p 5433 -h 127.0.0.1" in start_script
+
+
 def test_launcher_uses_legacy_env_for_legacy_runtime():
     launcher = LAUNCHER_PATH.read_text(encoding="utf-8")
     assert 'backend\\database\\.runtime' in launcher
