@@ -44,6 +44,41 @@ function Sync-ProjectDependencies {
     Set-Content -LiteralPath $dependencyStampFile -Value $currentHash -Encoding ascii
 }
 
+function Get-EnvFileValue {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [Parameter(Mandatory = $true)][string]$Name
+    )
+
+    if (-not (Test-Path -LiteralPath $Path)) { return $null }
+    $prefix = "$Name="
+    $line = Get-Content -LiteralPath $Path -Encoding utf8 |
+        Where-Object { $_.StartsWith($prefix) } |
+        Select-Object -First 1
+    if (-not $line) { return $null }
+
+    $value = $line.Substring($prefix.Length).Trim()
+    if ($value.Length -ge 2) {
+        $first = $value.Substring(0, 1)
+        $last = $value.Substring($value.Length - 1, 1)
+        if (($first -eq '"' -and $last -eq '"') -or ($first -eq "'" -and $last -eq "'")) {
+            $value = $value.Substring(1, $value.Length - 2)
+        }
+    }
+    return $value
+}
+
+function Import-AuthenticationEnvironment {
+    # The portable local app has a documented fallback login. Explicit values
+    # in the repository .env still win, but inherited Windows/terminal AUTH_*
+    # variables must not silently override this local application's credentials.
+    $configuredUsername = Get-EnvFileValue -Path $repoEnvFile -Name "AUTH_USERNAME"
+    $configuredPassword = Get-EnvFileValue -Path $repoEnvFile -Name "AUTH_PASSWORD"
+
+    $env:AUTH_USERNAME = if ([string]::IsNullOrWhiteSpace($configuredUsername)) { "admin" } else { $configuredUsername }
+    $env:AUTH_PASSWORD = if ([string]::IsNullOrWhiteSpace($configuredPassword)) { "migraine" } else { $configuredPassword }
+}
+
 function Import-DatabaseEnvironment {
     param(
         [Parameter(Mandatory = $true)][string]$RuntimeRoot
@@ -117,6 +152,7 @@ try {
         throw "Der verwendete PostgreSQL-Datenordner konnte nicht ermittelt werden."
     }
     Import-DatabaseEnvironment -RuntimeRoot $runtimeRoot
+    Import-AuthenticationEnvironment
 
     if (-not (Test-LocalDatabaseCredential -RuntimeRoot $runtimeRoot)) {
         if (-not (Test-Path -LiteralPath $repairPostgresCredentials)) {
