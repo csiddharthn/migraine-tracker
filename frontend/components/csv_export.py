@@ -10,6 +10,8 @@ from typing import Any
 import pandas as pd
 from pandas.api.types import is_scalar
 
+UTF16_LE_BOM = b"\xff\xfe"
+
 
 def table_date_format(language: str) -> str:
     """Return the Streamlit date format used by database tables."""
@@ -32,7 +34,7 @@ def dataframe_to_semicolon_csv(frame: pd.DataFrame, *, language: str) -> bytes:
         na_rep="",
     )
     csv_text = f"sep=;\r\n{table_text}"
-    return csv_text.encode("utf-8-sig")
+    return UTF16_LE_BOM + csv_text.encode("utf-16-le")
 
 
 def _export_cell(value: Any, *, language: str) -> Any:

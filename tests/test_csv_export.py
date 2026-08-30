@@ -23,11 +23,11 @@ def test_semicolon_csv_matches_german_display_and_keeps_one_line_per_record() ->
     )
 
     csv_bytes = dataframe_to_semicolon_csv(frame, language="de")
-    csv_text = csv_bytes.decode("utf-8-sig")
+    csv_text = csv_bytes.decode("utf-16")
     separator_hint, table_text = csv_text.split("\r\n", maxsplit=1)
     rows = list(csv.reader(io.StringIO(table_text, newline=""), delimiter=";", quotechar='"'))
 
-    assert csv_bytes.startswith(b"\xef\xbb\xbf")
+    assert csv_bytes.startswith(b"\xff\xfe")
     assert separator_hint == "sep=;"
     assert table_text.startswith("Datum;Zeitpunkt;Mögliche Einflussfaktoren;")
     assert '"Wenig Schlaf; Baby geweckt"' in table_text
@@ -51,7 +51,7 @@ def test_semicolon_csv_uses_the_english_table_date_formats() -> None:
         }
     )
 
-    csv_text = dataframe_to_semicolon_csv(frame, language="en").decode("utf-8-sig")
+    csv_text = dataframe_to_semicolon_csv(frame, language="en").decode("utf-16")
     _, table_text = csv_text.split("\r\n", maxsplit=1)
     rows = list(csv.reader(io.StringIO(table_text, newline=""), delimiter=";", quotechar='"'))
 

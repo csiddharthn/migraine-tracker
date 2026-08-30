@@ -93,7 +93,7 @@ with database_session() as session:
             tr(cfg, "CSV herunterladen", "Download CSV"),
             data=dataframe_to_semicolon_csv(frame, language=language),
             file_name=f"{selected_key}_{date.today():%Y%m%d}.csv",
-            mime="text/csv; charset=utf-8",
+            mime="text/csv; charset=utf-16le",
             icon=":material/download:",
         )
 
