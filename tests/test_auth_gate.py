@@ -16,15 +16,23 @@ class _FakeStreamlit:
         self._username = username
         self._password = password
         self.errors: list[str] = []
+        self.titles: list[str] = []
+        self.images: list[str] = []
+        self.captions: list[str] = []
 
-    def title(self, _label: str) -> None:
-        pass
+    def image(self, image: str, **_kwargs) -> None:
+        self.images.append(str(image))
 
-    def text_input(self, label: str, *, type: str | None = None) -> str:
-        del type
-        return self._username if label == "Username" else self._password
+    def title(self, label: str) -> None:
+        self.titles.append(label)
 
-    def button(self, _label: str) -> bool:
+    def caption(self, label: str) -> None:
+        self.captions.append(label)
+
+    def text_input(self, _label: str, *, type: str | None = None) -> str:
+        return self._password if type == "password" else self._username
+
+    def button(self, _label: str, **_kwargs) -> bool:
         return True
 
     def rerun(self) -> None:
@@ -53,6 +61,8 @@ def test_admin_login_sets_admin_session_state(monkeypatch) -> None:
     assert fake_st.session_state["is_admin"] is True
     assert "user_credential_username" not in fake_st.session_state
     assert "active_user_id" not in fake_st.session_state
+    assert fake_st.titles == ["Migraine Tracker"]
+    assert fake_st.images and fake_st.images[0].endswith("migraine_login_hero.svg")
 
 
 def test_database_user_login_sets_linked_profile_session(monkeypatch) -> None:
@@ -107,3 +117,23 @@ def test_existing_per_user_session_is_not_promoted(monkeypatch) -> None:
 
     assert auth_gate.render_auth_gate() is True
     assert fake_st.session_state["is_admin"] is False
+
+
+def test_logout_clears_authentication_and_selected_user(monkeypatch) -> None:
+    fake_st = _FakeStreamlit()
+    fake_st.session_state.update(
+        authenticated=True,
+        is_admin=True,
+        user_credential_username="admin-user",
+        active_user_id="profile-id",
+        pending_active_user_id="pending-id",
+        app_language="en",
+    )
+    monkeypatch.setattr(auth_gate, "st", fake_st)
+
+    with pytest.raises(_RerunSignal):
+        auth_gate.render_logout_button()
+
+    for key in auth_gate._AUTH_SESSION_KEYS:
+        assert key not in fake_st.session_state
+    assert fake_st.session_state["app_language"] == "en"

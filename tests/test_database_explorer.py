@@ -74,6 +74,7 @@ def test_database_explorer_scopes_personal_tables(session, user) -> None:
     user_table = explorer.load("users")
 
     assert counts == {"users": 2, "entries": 1, "daily_records": 1, "interpretations": 1}
+    assert explorer.latest_entry_date() == entry_date
     assert len(entry_table.rows) == 1
     assert entry_table.rows[0]["Person"] == "Testperson"
     assert entry_table.rows[0]["Stärke"] == user_strength

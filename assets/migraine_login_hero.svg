@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 420" role="img" aria-labelledby="title desc">
+  <title id="title">Migraine Tracker illustration</title>
+  <desc id="desc">Abstract illustration of a human head, migraine pulse, and health tracking chart.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#102a43"/>
+      <stop offset="0.55" stop-color="#1f4e79"/>
+      <stop offset="1" stop-color="#34699a"/>
+    </linearGradient>
+    <linearGradient id="glow" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#b8e3ff" stop-opacity="0.95"/>
+      <stop offset="1" stop-color="#d7c7ff" stop-opacity="0.78"/>
+    </linearGradient>
+    <filter id="soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="16"/>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="420" rx="32" fill="url(#bg)"/>
+  <circle cx="1040" cy="78" r="120" fill="#79c7ff" opacity="0.10"/>
+  <circle cx="910" cy="355" r="145" fill="#b69cff" opacity="0.09"/>
+  <circle cx="158" cy="70" r="88" fill="#ffffff" opacity="0.05"/>
+
+  <g transform="translate(90 42)">
+    <path d="M245 32c-88 0-160 70-160 157 0 59 31 109 79 136v43h124v-50c43-28 72-75 72-129 0-87-51-157-115-157z"
+          fill="#f7fbff" opacity="0.96"/>
+    <path d="M245 32c-88 0-160 70-160 157 0 59 31 109 79 136v43h54V32z"
+          fill="#dfeffc" opacity="0.8"/>
+    <path d="M216 96c-34 14-58 48-58 87 0 17 5 34 13 48 17 30 46 47 80 47 28 0 55-13 73-36"
+          fill="none" stroke="#7db6dc" stroke-width="10" stroke-linecap="round" opacity="0.72"/>
+    <circle cx="208" cy="158" r="56" fill="#7ec8ff" opacity="0.18" filter="url(#soft)"/>
+    <circle cx="208" cy="158" r="31" fill="url(#glow)" opacity="0.75"/>
+    <path d="M179 157h21l12-26 18 56 13-30h29" fill="none" stroke="#315f8a" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="179" cy="157" r="5" fill="#315f8a"/>
+    <circle cx="272" cy="157" r="5" fill="#315f8a"/>
+  </g>
+
+  <g transform="translate(520 75)">
+    <rect x="0" y="0" width="560" height="270" rx="24" fill="#ffffff" opacity="0.96"/>
+    <rect x="34" y="34" width="150" height="14" rx="7" fill="#b8c9d8"/>
+    <rect x="34" y="62" width="235" height="10" rx="5" fill="#d8e2ea"/>
+    <path d="M50 205 L126 174 L196 190 L274 126 L354 148 L432 84 L510 111"
+          fill="none" stroke="#3d79a8" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M50 220 H510" stroke="#dce6ed" stroke-width="2"/>
+    <path d="M50 172 H510" stroke="#e8eef3" stroke-width="2"/>
+    <path d="M50 124 H510" stroke="#e8eef3" stroke-width="2"/>
+    <circle cx="126" cy="174" r="8" fill="#78b7df"/>
+    <circle cx="274" cy="126" r="8" fill="#78b7df"/>
+    <circle cx="432" cy="84" r="8" fill="#a88bd4"/>
+    <rect x="45" y="238" width="86" height="8" rx="4" fill="#c9d8e3"/>
+    <rect x="156" y="238" width="86" height="8" rx="4" fill="#c9d8e3"/>
+    <rect x="267" y="238" width="86" height="8" rx="4" fill="#c9d8e3"/>
+    <rect x="378" y="238" width="86" height="8" rx="4" fill="#c9d8e3"/>
+  </g>
+</svg>

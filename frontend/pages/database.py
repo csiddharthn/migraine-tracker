@@ -33,6 +33,7 @@ with database_session() as session:
     user_caption(user)
     service = DatabaseExplorerService(session, user.id)
     counts = service.counts()
+    last_entry_date = service.latest_entry_date()
 
     metrics = st.columns(4)
     metrics[0].metric(tr(cfg, "Personen", "People"), counts["users"])
@@ -109,6 +110,7 @@ with database_session() as session:
                     patient_name=user.display_name,
                     tracking_start_date=user.tracking_start_date,
                     patient_active=user.active,
+                    last_entry_date=last_entry_date,
                     area_label=labels[selected_key],
                     area_description=localize_value(cfg, table.descriptor.description),
                     scope=scope,

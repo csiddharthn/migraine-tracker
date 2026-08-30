@@ -21,6 +21,7 @@ def dataframe_to_professional_excel(
     patient_name: str,
     tracking_start_date: date,
     patient_active: bool,
+    last_entry_date: date | None = None,
     area_label: str,
     area_description: str,
     scope: str,
@@ -62,6 +63,7 @@ def dataframe_to_professional_excel(
         patient_name=patient_name,
         tracking_start_date=tracking_start_date,
         patient_active=patient_active,
+        last_entry_date=last_entry_date,
         area_label=area_label,
         area_description=area_description,
         scope=scope,
@@ -222,6 +224,7 @@ def _write_overview_sheet(
     patient_name: str,
     tracking_start_date: date,
     patient_active: bool,
+    last_entry_date: date | None,
     area_label: str,
     area_description: str,
     scope: str,
@@ -259,12 +262,19 @@ def _write_overview_sheet(
         _t(language, "Patientenkontext", "Patient context"),
         formats["section"],
     )
+    last_entry_value: date | str = last_entry_date if last_entry_date is not None else "—"
+    last_entry_format = "date" if last_entry_date is not None else "value"
     profile_rows = [
         (_t(language, "Name", "Name"), patient_name, "value"),
         (
             _t(language, "Erfassung seit", "Tracking since"),
             tracking_start_date,
             "date",
+        ),
+        (
+            _t(language, "Letzter Eintrag am", "Last entry on"),
+            last_entry_value,
+            last_entry_format,
         ),
         (
             _t(language, "Profilstatus", "Profile status"),

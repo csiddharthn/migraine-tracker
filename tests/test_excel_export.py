@@ -33,6 +33,7 @@ def test_professional_excel_contains_overview_patient_context_and_data_table() -
         patient_name="Test Patient",
         tracking_start_date=date(2022, 6, 1),
         patient_active=True,
+        last_entry_date=date(2026, 8, 30),
         area_label="Kopfschmerzeinträge",
         area_description="Dokumentierte Kopfschmerz- und Migränetage.",
         scope="Ausgewählte Person: Test Patient",
@@ -54,9 +55,11 @@ def test_professional_excel_contains_overview_patient_context_and_data_table() -
     assert 'name="Daten"' in workbook_xml
     assert "Test Patient" in shared_strings
     assert "Erfassung seit" in shared_strings
+    assert "Letzter Eintrag am" in shared_strings
     assert "Kopfschmerzeinträge" in shared_strings
     assert "42" not in shared_strings  # metrics are stored as numbers
     assert "Höhepunkt" in shared_strings
+    assert "46264" in overview_xml  # 2026-08-30 as an Excel date serial
     assert "<pane" in data_xml
     assert 'state="frozen"' in data_xml
     assert "<tableParts" in data_xml
@@ -80,6 +83,7 @@ def test_professional_excel_localizes_overview_for_english() -> None:
         patient_name="Test Patient",
         tracking_start_date=date(2022, 6, 1),
         patient_active=True,
+        last_entry_date=date(2026, 8, 30),
         area_label="Headache entries",
         area_description="Documented headache and migraine days.",
         scope="Selected person: Test Patient",
@@ -93,5 +97,28 @@ def test_professional_excel_localizes_overview_for_english() -> None:
     assert 'name="Overview"' in workbook_xml
     assert 'name="Data"' in workbook_xml
     assert "Tracking since" in shared_strings
+    assert "Last entry on" in shared_strings
     assert "Technical fields" in shared_strings
     assert "No filter" in shared_strings
+
+
+def test_professional_excel_handles_missing_last_entry_date() -> None:
+    frame = pd.DataFrame({"Person": ["New Patient"]})
+
+    payload = dataframe_to_professional_excel(
+        frame,
+        language="en",
+        patient_name="New Patient",
+        tracking_start_date=date(2026, 8, 30),
+        patient_active=True,
+        last_entry_date=None,
+        area_label="Headache entries",
+        area_description="Documented headache and migraine days.",
+        scope="Selected person: New Patient",
+        counts={"entries": 0, "daily_records": 0, "interpretations": 0},
+        exported_at=datetime(2026, 8, 30, 2, 45, 0),
+    )
+
+    shared_strings = _xlsx_text(payload, "xl/sharedStrings.xml")
+    assert "Last entry on" in shared_strings
+    assert "—" in shared_strings

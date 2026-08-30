@@ -17,7 +17,7 @@ Call hierarchy:
 import json
 import uuid
 from dataclasses import dataclass
-from datetime import time
+from datetime import date, time
 from typing import Any, Callable
 
 from sqlalchemy.orm import Session
@@ -70,6 +70,9 @@ class DatabaseExplorerService:
 
     def counts(self) -> dict[str, int]:
         return self.repository.counts()
+
+    def latest_entry_date(self) -> date | None:
+        return self.repository.latest_entry_date()
 
     def descriptors(self) -> tuple[TableDescriptor, ...]:
         return self.TABLES

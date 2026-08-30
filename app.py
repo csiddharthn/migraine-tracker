@@ -4,7 +4,7 @@ from pathlib import Path
 
 import streamlit as st
 
-from frontend.components.auth_gate import render_auth_gate
+from frontend.components.auth_gate import render_auth_gate, render_logout_button
 from frontend.components.filters import render_report_period
 from frontend.components.state import database_session
 from frontend.components.users import render_user_settings
@@ -84,5 +84,7 @@ with st.sidebar:
         st.caption(section_title)
         for path, title, icon, _ in section_specs:
             st.page_link(pages_by_path[path], label=title, icon=icon, width="stretch")
+    st.divider()
+    render_logout_button()
 
 navigation.run()

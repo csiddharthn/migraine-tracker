@@ -8,11 +8,31 @@ credentials. Other usernames are verified against the database-backed
 user_credentials table and are linked to their corresponding user profile.
 """
 
+from pathlib import Path
+
 import streamlit as st
 
 from backend.config.settings import get_settings
 from backend.services.auth_service import AuthService
 from frontend.components.state import database_session
+from frontend.config.name_space import cfg
+from frontend.i18n import tr
+
+
+ROOT = Path(__file__).resolve().parents[2]
+LOGIN_HERO = ROOT / "assets" / "migraine_login_hero.svg"
+_AUTH_SESSION_KEYS = (
+    "authenticated",
+    "is_admin",
+    "user_credential_username",
+    "active_user_id",
+    "pending_active_user_id",
+)
+
+
+def _t(german: str, english: str) -> str:
+    language = st.session_state.get("app_language", "de")
+    return tr(cfg, german, english, lang=language)
 
 
 def _database_user_identity(username: str, password: str):
@@ -28,6 +48,25 @@ def _database_user_identity(username: str, password: str):
         return credential.user_id, getattr(profile, "role", "user") == "admin"
 
 
+def _clear_auth_session() -> None:
+    for key in _AUTH_SESSION_KEYS:
+        st.session_state.pop(key, None)
+
+
+def render_logout_button() -> None:
+    """Render a sidebar logout action for authenticated sessions."""
+    if not st.session_state.get("authenticated"):
+        return
+    if st.button(
+        _t("Abmelden", "Logout"),
+        icon=":material/logout:",
+        width="stretch",
+        key="logout_button",
+    ):
+        _clear_auth_session()
+        st.rerun()
+
+
 def render_auth_gate() -> bool:
     settings = get_settings()
     if st.session_state.get("authenticated"):
@@ -38,10 +77,17 @@ def render_auth_gate() -> bool:
             st.session_state["is_admin"] = True
         return True
 
-    st.title("Access Control")
-    username = st.text_input("Username")
-    password = st.text_input("Password", type="password")
-    if st.button("Login"):
+    st.image(str(LOGIN_HERO), width="stretch")
+    st.title("Migraine Tracker")
+    st.caption(
+        _t(
+            "Persönliches Kopfschmerz- und Migränetagebuch mit Auswertungen und Datenexport.",
+            "Personal headache and migraine diary with analytics and data export.",
+        )
+    )
+    username = st.text_input(_t("Benutzername", "Username"))
+    password = st.text_input(_t("Passwort", "Password"), type="password")
+    if st.button(_t("Anmelden", "Login"), type="primary", width="stretch"):
         expected_user = settings.auth_username
         expected_pass = settings.auth_password.get_secret_value() if settings.auth_password else ""
 
@@ -64,6 +110,6 @@ def render_auth_gate() -> bool:
             st.session_state["active_user_id"] = user_id
             st.rerun()
 
-        st.error("Invalid credentials")
+        st.error(_t("Benutzername oder Passwort ist ungültig.", "Invalid username or password."))
     st.stop()
     return False

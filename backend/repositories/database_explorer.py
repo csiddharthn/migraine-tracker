@@ -15,6 +15,7 @@ Call hierarchy:
 """
 
 import uuid
+from datetime import date
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
@@ -51,6 +52,11 @@ class DatabaseExplorerRepository:
                 or 0
             ),
         }
+
+    def latest_entry_date(self) -> date | None:
+        return self.session.scalar(
+            select(func.max(MigraineEntry.entry_date)).where(MigraineEntry.user_id == self.user_id)
+        )
 
     def users(self) -> list[UserProfile]:
         return list(self.session.scalars(select(UserProfile).order_by(UserProfile.display_name)))
