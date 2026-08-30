@@ -16,7 +16,9 @@ Call hierarchy:
 
 import os
 from contextlib import contextmanager
+from pathlib import Path
 from typing import Iterator
+from urllib.parse import quote
 
 import streamlit as st
 from sqlalchemy.orm import Session, sessionmaker
@@ -26,15 +28,68 @@ from backend.config import get_settings
 from backend.database.session import create_session_factory
 
 
-def _database_url() -> str:
-    """Resolve the database URL, preferring a launcher-provided process override.
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
-    The local launcher selects the PostgreSQL runtime first and exports the
-    matching MIGRAINE_DATABASE_URL into the Streamlit process. That explicit
-    runtime-specific value must win over a potentially stale
-    .streamlit/secrets.toml entry. Streamlit secrets remain a supported fallback
-    for deployments that do not provide an environment variable.
+
+def _portable_runtime_root() -> Path | None:
+    """Return the bundled PostgreSQL runtime root when this is a local install."""
+    candidates = (
+        PROJECT_ROOT / ".runtime",
+        PROJECT_ROOT / "backend" / "database" / ".runtime",
+    )
+    for candidate in candidates:
+        if (candidate / "pgsql" / "bin" / "pg_ctl.exe").is_file() and (candidate / "pgdata" / "PG_VERSION").is_file():
+            return candidate
+    return None
+
+
+def _env_file_value(name: str) -> str | None:
+    """Read one simple KEY=VALUE entry from the repository .env file."""
+    env_file = PROJECT_ROOT / ".env"
+    if not env_file.is_file():
+        return None
+    for raw_line in env_file.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        if key.strip() != name:
+            continue
+        value = value.strip()
+        if len(value) >= 2 and value[0] == value[-1] and value[0] in {'"', "'"}:
+            value = value[1:-1]
+        return value
+    return None
+
+
+def _local_portable_database_url() -> str | None:
+    """Build the canonical URL for the bundled Windows PostgreSQL database.
+
+    Local copies can retain a stale MIGRAINE_DATABASE_URL after being moved or
+    copied. If the bundled PostgreSQL runtime is present, its fixed local
+    address is authoritative and only the password is taken from configuration.
     """
+    if _portable_runtime_root() is None:
+        return None
+    password = os.environ.get("POSTGRES_PASSWORD") or _env_file_value("POSTGRES_PASSWORD")
+    if not password:
+        return None
+    encoded_password = quote(password, safe="")
+    return f"postgresql+psycopg://migraine:{encoded_password}@127.0.0.1:5433/migraine_tracker"
+
+
+def _database_url() -> str:
+    """Resolve the database URL, preferring the bundled local database when present.
+
+    The portable Windows install always uses PostgreSQL on 127.0.0.1:5433. Its
+    location should win over stale URLs left in a moved/copied .env file, shell
+    environment, or Streamlit secrets. Non-portable deployments continue to use
+    the normal environment/secrets/settings precedence.
+    """
+    local_url = _local_portable_database_url()
+    if local_url:
+        return local_url
+
     process_url = os.environ.get("MIGRAINE_DATABASE_URL")
     if process_url:
         return process_url.strip()
