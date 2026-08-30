@@ -1,3 +1,4 @@
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
@@ -29,7 +30,7 @@ class _FakeStreamlit:
     def caption(self, label: str) -> None:
         self.captions.append(label)
 
-    def text_input(self, _label: str, *, type: str | None = None) -> str:
+    def text_input(self, _label: str, *, type: str | None = None, **_kwargs) -> str:
         return self._password if type == "password" else self._username
 
     def button(self, _label: str, **_kwargs) -> bool:
@@ -127,6 +128,7 @@ def test_logout_clears_authentication_and_selected_user(monkeypatch) -> None:
         user_credential_username="admin-user",
         active_user_id="profile-id",
         pending_active_user_id="pending-id",
+        auth_mode="signup",
         app_language="en",
     )
     monkeypatch.setattr(auth_gate, "st", fake_st)
@@ -137,3 +139,58 @@ def test_logout_clears_authentication_and_selected_user(monkeypatch) -> None:
     for key in auth_gate._AUTH_SESSION_KEYS:
         assert key not in fake_st.session_state
     assert fake_st.session_state["app_language"] == "en"
+
+
+def test_registration_validation_normalizes_username(monkeypatch) -> None:
+    fake_st = _FakeStreamlit()
+    monkeypatch.setattr(auth_gate, "st", fake_st)
+
+    display_name, username = auth_gate._validate_registration(
+        "  Jane   Doe ",
+        " Jane.Doe_26 ",
+        "password123",
+        "password123",
+        admin_username="admin",
+    )
+
+    assert display_name == "Jane Doe"
+    assert username == "jane.doe_26"
+
+
+def test_registration_rejects_reserved_admin_username(monkeypatch) -> None:
+    fake_st = _FakeStreamlit()
+    monkeypatch.setattr(auth_gate, "st", fake_st)
+
+    with pytest.raises(ValueError):
+        auth_gate._validate_registration(
+            "Jane Doe",
+            "ADMIN",
+            "password123",
+            "password123",
+            admin_username="admin",
+        )
+
+
+def test_registration_requires_matching_passwords(monkeypatch) -> None:
+    fake_st = _FakeStreamlit()
+    monkeypatch.setattr(auth_gate, "st", fake_st)
+
+    with pytest.raises(ValueError):
+        auth_gate._validate_registration(
+            "Jane Doe",
+            "janedoe",
+            "password123",
+            "different123",
+            admin_username="admin",
+        )
+
+
+def test_logout_is_rendered_before_profile_and_navigation() -> None:
+    app_source = Path("app.py").read_text(encoding="utf-8")
+
+    logout_position = app_source.index("render_logout_button()")
+    profile_position = app_source.index("render_user_settings(session)")
+    first_page_link_position = app_source.index("st.page_link(")
+
+    assert logout_position < profile_position
+    assert logout_position < first_page_link_position
