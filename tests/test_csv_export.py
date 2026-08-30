@@ -17,7 +17,10 @@ def test_semicolon_csv_matches_german_display_and_keeps_one_line_per_record() ->
             "Datum": [date(2026, 8, 29), date(2026, 8, 30)],
             "Zeitpunkt": [datetime(2026, 8, 29, 16, 5, 7), None],
             "Mögliche Einflussfaktoren": ["Wenig Schlaf; Baby geweckt", "Hitze"],
-            "Zeitlicher Ablauf": ["10:00 Uhr: Beginn, leicht.\n\n16:00 Uhr: Höhepunkt.", "Keine Beschwerden"],
+            "Zeitlicher Ablauf": [
+                "10:00–12:00 Uhr: Beginn – leicht.\n\n16:00 Uhr: Höhepunkt.",
+                "Keine Beschwerden",
+            ],
             "Erbrechen": ["Nein", "Ja"],
         }
     )
@@ -37,7 +40,7 @@ def test_semicolon_csv_matches_german_display_and_keeps_one_line_per_record() ->
         "29.08.2026",
         "29.08.2026 16:05:07",
         "Wenig Schlaf; Baby geweckt",
-        "10:00 Uhr: Beginn, leicht. 16:00 Uhr: Höhepunkt.",
+        "10:00-12:00 Uhr: Beginn – leicht. 16:00 Uhr: Höhepunkt.",
         "Nein",
     ]
     assert rows[2] == ["30.08.2026", "", "Hitze", "Keine Beschwerden", "Ja"]

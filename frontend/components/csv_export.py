@@ -11,6 +11,7 @@ import pandas as pd
 from pandas.api.types import is_scalar
 
 UTF16_LE_BOM = b"\xff\xfe"
+TIME_RANGE_SEPARATOR = re.compile(r"(?<=\d{2}:\d{2})\s*[–—−]\s*(?=\d{2}:\d{2})")
 
 
 def table_date_format(language: str) -> str:
@@ -50,7 +51,8 @@ def _export_cell(value: Any, *, language: str) -> Any:
         pattern = "%Y-%m-%d" if language == "en" else "%d.%m.%Y"
         return value.strftime(pattern)
     if isinstance(value, str):
-        return re.sub(r"[ \t]*[\r\n]+[ \t]*", " ", value).strip()
+        flattened = re.sub(r"[ \t]*[\r\n]+[ \t]*", " ", value).strip()
+        return TIME_RANGE_SEPARATOR.sub("-", flattened)
     return value
 
 
