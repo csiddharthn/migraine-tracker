@@ -11,6 +11,7 @@ user_credentials table and are linked to their corresponding user profile.
 from pathlib import Path
 
 import streamlit as st
+from sqlalchemy.exc import OperationalError
 
 from backend.config.settings import get_settings
 from backend.services.auth_service import AuthService
@@ -101,7 +102,19 @@ def render_auth_gate() -> bool:
 
         # All other accounts are authenticated against user_credentials and
         # remain linked to the user_profile referenced by that credential.
-        identity = _database_user_identity(username, password)
+        try:
+            identity = _database_user_identity(username, password)
+        except OperationalError:
+            st.error(
+                _t(
+                    "Die lokale PostgreSQL-Datenbank ist momentan nicht erreichbar. "
+                    "Bitte den Tracker über „Kopfschmerz-Tracker starten.cmd“ starten und anschließend erneut anmelden.",
+                    "The local PostgreSQL database is currently unavailable. "
+                    "Please start the tracker with ‘Kopfschmerz-Tracker starten.cmd’ and then try logging in again.",
+                )
+            )
+            st.stop()
+
         if identity is not None:
             user_id, is_admin = identity
             st.session_state["authenticated"] = True
