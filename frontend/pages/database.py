@@ -92,7 +92,7 @@ with database_session() as session:
             column_config=column_config,
         )
 
-        csv_column, excel_column = st.columns(2)
+        csv_column, excel_column, _ = st.columns([1, 1, 6], gap="small")
         with csv_column:
             st.download_button(
                 tr(cfg, "CSV herunterladen", "Download CSV"),
